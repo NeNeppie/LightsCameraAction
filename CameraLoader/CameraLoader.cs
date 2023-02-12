@@ -1,9 +1,5 @@
 ﻿using Dalamud.Plugin;
-using Dalamud.Game;
 using Dalamud.Game.Command;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Objects;
-using Dalamud.Interface.Windowing;
 using CameraLoader.Attributes;
 using System;
 
@@ -13,39 +9,26 @@ public class CameraLoader : IDalamudPlugin
 {
     private readonly DalamudPluginInterface _pluginInterface;
     private readonly PluginCommandManager<CameraLoader> _commandManager;
-    private readonly WindowSystem _windowSystem;
-    private readonly Configuration _config;
 
     private PluginWindow _window;
     public string Name => "CameraLoader";
 
-    public CameraLoader(
-        DalamudPluginInterface pluginInterface,
-        CommandManager commands,
-        ClientState clientState,
-        ObjectTable objectTable,
-        SigScanner sigScanner)
+    public CameraLoader(DalamudPluginInterface pluginInterface, CommandManager commands)
     {
         this._pluginInterface = pluginInterface;
+        this._pluginInterface.Create<Service>();
 
         // Load commands
         this._commandManager = new PluginCommandManager<CameraLoader>(this, commands);
 
         // Get or create a configuration object
-        this._config = (Configuration)this._pluginInterface.GetPluginConfig() ?? new Configuration();
-        this._config.Initialize(pluginInterface);
+        Service.Config = (Configuration)this._pluginInterface.GetPluginConfig() ?? new Configuration();
+        Service.Config.Initialize(this._pluginInterface);
 
         // Initialize the UI
-        this._windowSystem = new WindowSystem(this.Name);
-
-        _window = this._pluginInterface.Create<PluginWindow>(clientState, objectTable, sigScanner, _config);
-        if (_window is not null)
-        {
-            this._windowSystem.AddWindow(_window);
-        }
-
+        _window = this._pluginInterface.Create<PluginWindow>();
         this._pluginInterface.UiBuilder.DisableGposeUiHide = true;
-        this._pluginInterface.UiBuilder.Draw += this._windowSystem.Draw;
+        this._pluginInterface.UiBuilder.Draw += _window.Draw;
     }
 
     [Command("/cameraloader")]
@@ -63,10 +46,9 @@ public class CameraLoader : IDalamudPlugin
 
         this._commandManager.Dispose();
 
-        this._pluginInterface.SavePluginConfig(this._config);
+        this._pluginInterface.SavePluginConfig(Service.Config);
 
-        this._pluginInterface.UiBuilder.Draw -= this._windowSystem.Draw;
-        this._windowSystem.RemoveAllWindows();
+        this._pluginInterface.UiBuilder.Draw -= this._window.Draw;
     }
 
     public void Dispose()
