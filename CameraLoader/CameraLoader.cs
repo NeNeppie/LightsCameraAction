@@ -1,5 +1,6 @@
 ﻿using Dalamud.Plugin;
 using Dalamud.Game.Command;
+using Dalamud.Interface.Windowing;
 using CameraLoader.Attributes;
 using System;
 
@@ -9,6 +10,7 @@ public class CameraLoader : IDalamudPlugin
 {
     private readonly DalamudPluginInterface _pluginInterface;
     private readonly PluginCommandManager<CameraLoader> _commandManager;
+    private readonly WindowSystem _windowSystem;
 
     private PluginWindow _window;
     public string Name => "CameraLoader";
@@ -26,9 +28,12 @@ public class CameraLoader : IDalamudPlugin
         Service.Config.Initialize(this._pluginInterface);
 
         // Initialize the UI
+        _windowSystem = new WindowSystem(this.Name);
         _window = this._pluginInterface.Create<PluginWindow>();
+        _windowSystem.AddWindow(_window);
+
         this._pluginInterface.UiBuilder.DisableGposeUiHide = true;
-        this._pluginInterface.UiBuilder.Draw += _window.Draw;
+        this._pluginInterface.UiBuilder.Draw += this._windowSystem.Draw;
     }
 
     [Command("/cameraloader")]
