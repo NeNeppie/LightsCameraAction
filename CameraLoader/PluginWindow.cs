@@ -14,7 +14,7 @@ public unsafe class PluginWindow : Window
     public PluginWindow() : base("CameraLoader")
     {
         IsOpen = false;
-        Size = new Vector2(810, 520);
+        Size = new Vector2(405, 420);
         SizeCondition = ImGuiCond.FirstUseEver;
 
         var cameraManager = (CameraManager*)Service.SigScanner.GetStaticAddressFromSig("4C 8D 35 ?? ?? ?? ?? 85 D2");
@@ -31,52 +31,82 @@ public unsafe class PluginWindow : Window
         if (isInCameraMode && gposeActorExists)
         {
             // Save a preset
-            if (ImGui.Button($"Save position"))
+            ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.2f, 0.8f, 0.41f, 0.7f));
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.2f, 0.9f, 0.41f, 0.7f));
+            ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.2f, 1f, 0.41f, 0.7f));
+            if (ImGui.Button($"Create a new preset", new Vector2(ImGui.GetContentRegionAvail().X, 40f)))
             {
-                float cameraRot = _camera->HRotation;
-                float playerRot = (float)Service.ClientState.LocalPlayer?.Rotation;
-                float relativeRot = CameraToRelative(cameraRot, playerRot);
-
-                cameraPreset preset = new cameraPreset(++Service.Config.numOfPresets);
-                preset.distance = _camera->Distance;
-                preset.hRotation = relativeRot;
-                preset.vRotation = _camera->VRotation;
-                preset.zoomFoV = _camera->FoV;
-                preset.gposeFoV = _camera->AddedFoV;
-                preset.pan = _camera->Pan;
-                preset.tilt = _camera->Tilt;
-                preset.roll = _camera->Roll;
-
-                Service.Config.presets.Add(preset);
-                Service.Config.Save();
+                // TODO: Ability to choose between "Character Position" and "Camera Position" save/load methods
+                SavePreset();
             }
+            ImGui.PopStyleColor(3);
 
-            // TODO: Remove Preset Button
+            ImGui.BeginChild("Preset Menu", ImGui.GetContentRegionAvail(), true);
 
-            // TODO: Rename Button, view details
-            // TODO: Ability to choose between "Character Position" and "Camera Position" save/load methods
-
-            // Load a preset
             for (int i = 0; i < Service.Config.numOfPresets; i++)
             {
                 var preset = Service.Config.presets[i];
-                if (ImGui.Selectable(preset.name, false))
+                if (ImGui.TreeNode($"{preset.name}##{i}"))
                 {
-                    _camera->Distance = preset.distance;
-                    _camera->HRotation = RelativeToCamera(preset.hRotation, (float)Service.ClientState.LocalPlayer?.Rotation);
-                    _camera->VRotation = preset.vRotation;
-                    _camera->FoV = preset.zoomFoV;
-                    _camera->AddedFoV = preset.gposeFoV;
-                    _camera->Pan = preset.pan;
-                    _camera->Tilt = preset.tilt;
-                    _camera->Roll = preset.roll;
+                    // TODO: Rename button (small? also description button?)
+                    ImGui.TextWrapped("Placeholder Text. A description maybe? Camera information?");
+                    if (ImGui.Button("Load Preset"))
+                    {
+                        LoadPreset(ref preset);
+                    }
+                    ImGui.SameLine();
+                    if (ImGui.Button("Delete Preset"))
+                    {
+                        DeletePreset(ref preset);
+                    }
+                    ImGui.TreePop();
                 }
             }
+            ImGui.EndChild();
         }
         else
         {
-            ImGui.Text("To use the plugin you must be in Group Pose.");
+            ImGui.TextWrapped("To use the plugin you must be in Group Pose.");
         }
+    }
+
+    private void SavePreset()
+    {
+        float cameraRot = _camera->HRotation;
+        float playerRot = (float)Service.ClientState.LocalPlayer?.Rotation;
+        float relativeRot = CameraToRelative(cameraRot, playerRot);
+
+        cameraPreset preset = new cameraPreset(++Service.Config.numOfPresets);
+        preset.distance = _camera->Distance;
+        preset.hRotation = relativeRot;
+        preset.vRotation = _camera->VRotation;
+        preset.zoomFoV = _camera->FoV;
+        preset.gposeFoV = _camera->AddedFoV;
+        preset.pan = _camera->Pan;
+        preset.tilt = _camera->Tilt;
+        preset.roll = _camera->Roll;
+
+        Service.Config.presets.Add(preset);
+        Service.Config.Save();
+    }
+
+    private void LoadPreset(ref cameraPreset preset)
+    {
+        _camera->Distance = preset.distance;
+        _camera->HRotation = RelativeToCamera(preset.hRotation, (float)Service.ClientState.LocalPlayer?.Rotation);
+        _camera->VRotation = preset.vRotation;
+        _camera->FoV = preset.zoomFoV;
+        _camera->AddedFoV = preset.gposeFoV;
+        _camera->Pan = preset.pan;
+        _camera->Tilt = preset.tilt;
+        _camera->Roll = preset.roll;
+    }
+
+    private void DeletePreset(ref cameraPreset preset)
+    {
+        Service.Config.presets.Remove(preset);
+        Service.Config.numOfPresets--;
+        Service.Config.Save();
     }
 
     private float CameraToRelative(float camRot, float playerRot)
