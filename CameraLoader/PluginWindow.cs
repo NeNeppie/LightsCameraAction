@@ -17,7 +17,7 @@ public unsafe class PluginWindow : Window
     public PluginWindow() : base("CameraLoader")
     {
         IsOpen = false;
-        Size = new Vector2(405, 420);
+        Size = new Vector2(305, 420);
         SizeCondition = ImGuiCond.FirstUseEver;
 
         var cameraManager = (CameraManager*)Service.SigScanner.GetStaticAddressFromSig("4C 8D 35 ?? ?? ?? ?? 85 D2");
