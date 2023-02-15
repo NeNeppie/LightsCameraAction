@@ -1,7 +1,7 @@
 # CameraLoader for Dalamud
 Ever wished you could save multiple camera presets at any given time?
 
-Ever took a screenshot with that perfect angle? The ultimate selfie, a beautiful shot of a vista, a glorious picture of your static, or a vertical image showcasing your glam? As you're about to exit GPose you think to yourself, "I should save this angle for later! But I already have some settings saved for another occasion... Now, which one do I choose..."
+Ever took a screenshot with that perfect angle? The ultimate selfie, a beautiful shot of a vista, a glorious picture of your static, or a vertical image showcasing your glam? And as you're about to exit GPose you think to yourself, "I should save this angle for later! But I already have some settings saved for another occasion... Now, which one do I choose..."
 
 I know I have. Well, you no longer need to choose! This plugin lets you save as many presets as you want!
 
