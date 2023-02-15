@@ -11,6 +11,9 @@ public unsafe class PluginWindow : Window
 {
     private GameCamera* _camera;
 
+    private bool _renameOpen = false;
+    private int _primaryFocus = -1;
+
     public PluginWindow() : base("CameraLoader")
     {
         IsOpen = false;
@@ -36,7 +39,6 @@ public unsafe class PluginWindow : Window
             ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.2f, 1f, 0.41f, 0.7f));
             if (ImGui.Button($"Create a new preset", new Vector2(ImGui.GetContentRegionAvail().X, 40f)))
             {
-                // TODO: Ability to choose between "Character Position" and "Camera Position" save/load methods
                 SavePreset();
             }
             ImGui.PopStyleColor(3);
@@ -48,16 +50,45 @@ public unsafe class PluginWindow : Window
                 var preset = Service.Config.presets[i];
                 if (ImGui.TreeNode($"{preset.name}##{i}"))
                 {
-                    // TODO: Rename button (small? also description button?)
                     ImGui.TextWrapped("Placeholder Text. A description maybe? Camera information?");
                     if (ImGui.Button("Load Preset"))
                     {
                         LoadPreset(ref preset);
                     }
                     ImGui.SameLine();
+                    // Show / Hide the rename input box
+                    if (ImGui.Button("Rename"))
+                    {
+                        if (this._primaryFocus != i)
+                        {
+                            this._renameOpen = true;
+                            this._primaryFocus = i;
+                        }
+                        else
+                        {
+                            this._renameOpen = false;
+                            this._primaryFocus = -1;
+                        }
+                    }
+                    ImGui.SameLine();
                     if (ImGui.Button("Delete Preset"))
                     {
                         DeletePreset(ref preset);
+
+                        this._renameOpen = false;
+                        this._primaryFocus = -1;
+                    }
+
+                    if (this._renameOpen && this._primaryFocus == i)
+                    {
+                        string newName = preset.name;
+                        if (ImGui.InputText("##Rename(Input)", ref newName, 30, ImGuiInputTextFlags.EnterReturnsTrue))
+                        {
+                            preset.name = newName;
+                            Service.Config.Save();
+                            this._renameOpen = false;
+                            this._primaryFocus = -1;
+                        }
                     }
                     ImGui.TreePop();
                 }
