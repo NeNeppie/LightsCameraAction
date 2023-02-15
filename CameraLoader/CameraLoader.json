@@ -1,8 +1,9 @@
 {
-  "Name": "CameraLoader_dev",
+  "Name": "Camera Loader",
   "Author": "NeNeppie",
-  "Description": "",
-  "Punchline": "",
-  "RepoUrl": "",
-  "Tags": []
+  "Description": "Ever wished you could save multiple camera presets at any given time? I know I have. Well, this plugin lets you save as many as you want!\n\n*Only useable within Group Pose.*",
+  "Punchline": "Save and load camera presets in Group Pose",
+  "RepoUrl": "https://github.com/NeNeppie/CameraLoader",
+  "Tags": ["Utility", "UI", "Gpose", "Group pose", "Camera"],
+  "CategoryTags": ["Utility", "UI"]
 }
