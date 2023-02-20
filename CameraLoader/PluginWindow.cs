@@ -32,74 +32,72 @@ public unsafe class PluginWindow : Window
 
         bool isInCameraMode = Service.ClientState.LocalPlayer?.OnlineStatus.Id == 18;
         bool gposeActorExists = Service.ObjectTable[201] != null;
-        if (isInCameraMode && gposeActorExists)
+        if (!(isInCameraMode && gposeActorExists))
         {
-            // Save a preset
-            ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.2f, 0.8f, 0.41f, 0.7f));
-            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.2f, 0.9f, 0.41f, 0.7f));
-            ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.2f, 1f, 0.41f, 0.7f));
-            if (ImGui.Button($"Create a new preset", new Vector2(ImGui.GetContentRegionAvail().X, 40f)))
-            {
-                SavePreset();
-            }
-            ImGui.PopStyleColor(3);
+            ImGui.TextWrapped("To use the plugin you must be in Group Pose.");
+            return;
+        }
 
-            ImGui.BeginChild("Preset Menu", ImGui.GetContentRegionAvail(), true);
+        ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.2f, 0.8f, 0.41f, 0.7f));
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.2f, 0.9f, 0.41f, 0.7f));
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.2f, 1f, 0.41f, 0.7f));
+        if (ImGui.Button($"Create a new preset", new Vector2(ImGui.GetContentRegionAvail().X, 40f)))
+        {
+            SavePreset();
+        }
+        ImGui.PopStyleColor(3);
 
-            for (int i = 0; i < Service.Config.numOfPresets; i++)
+        ImGui.BeginChild("Preset Menu", ImGui.GetContentRegionAvail(), true);
+
+        for (int i = 0; i < Service.Config.numOfPresets; i++)
+        {
+            var preset = Service.Config.presets[i];
+            if (ImGui.TreeNode($"{preset.name}##{i}"))
             {
-                var preset = Service.Config.presets[i];
-                if (ImGui.TreeNode($"{preset.name}##{i}"))
+                PrintPreset(ref preset);
+                if (ImGui.Button("Load Preset"))
                 {
-                    PrintPreset(ref preset);
-                    if (ImGui.Button("Load Preset"))
+                    LoadPreset(ref preset);
+                }
+                ImGui.SameLine();
+                // Show / Hide the rename input box
+                if (ImGui.Button("Rename"))
+                {
+                    if (this._primaryFocus != i)
                     {
-                        LoadPreset(ref preset);
+                        this._renameOpen = true;
+                        this._primaryFocus = i;
                     }
-                    ImGui.SameLine();
-                    // Show / Hide the rename input box
-                    if (ImGui.Button("Rename"))
+                    else
                     {
-                        if (this._primaryFocus != i)
-                        {
-                            this._renameOpen = true;
-                            this._primaryFocus = i;
-                        }
-                        else
-                        {
-                            this._renameOpen = false;
-                            this._primaryFocus = -1;
-                        }
-                    }
-                    ImGui.SameLine();
-                    if (ImGui.Button("Delete Preset"))
-                    {
-                        DeletePreset(ref preset);
-
                         this._renameOpen = false;
                         this._primaryFocus = -1;
                     }
-
-                    if (this._renameOpen && this._primaryFocus == i)
-                    {
-                        string newName = preset.name;
-                        if (ImGui.InputText("##Rename(Input)", ref newName, 30, ImGuiInputTextFlags.EnterReturnsTrue))
-                        {
-                            preset.name = newName;
-                            Service.Config.Save();
-                            this._renameOpen = false;
-                            this._primaryFocus = -1;
-                        }
-                    }
-                    ImGui.TreePop();
                 }
+                ImGui.SameLine();
+                if (ImGui.Button("Delete Preset"))
+                {
+                    DeletePreset(ref preset);
+
+                    this._renameOpen = false;
+                    this._primaryFocus = -1;
+                }
+
+                if (this._renameOpen && this._primaryFocus == i)
+                {
+                    string newName = preset.name;
+                    if (ImGui.InputText("##Rename(Input)", ref newName, 30, ImGuiInputTextFlags.EnterReturnsTrue))
+                    {
+                        preset.name = newName;
+                        Service.Config.Save();
+                        this._renameOpen = false;
+                        this._primaryFocus = -1;
+                    }
+                }
+                ImGui.TreePop();
             }
-            ImGui.EndChild();
         }
-        else
-        {
-            ImGui.TextWrapped("To use the plugin you must be in Group Pose.");
-        }
+        ImGui.EndChild();
     }
 
     private void PrintPreset(ref cameraPreset preset)
