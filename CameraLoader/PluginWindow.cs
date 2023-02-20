@@ -50,7 +50,7 @@ public unsafe class PluginWindow : Window
                 var preset = Service.Config.presets[i];
                 if (ImGui.TreeNode($"{preset.name}##{i}"))
                 {
-                    ImGui.TextWrapped("Placeholder Text. A description maybe? Camera information?");
+                    PrintPreset(ref preset);
                     if (ImGui.Button("Load Preset"))
                     {
                         LoadPreset(ref preset);
@@ -99,6 +99,16 @@ public unsafe class PluginWindow : Window
         {
             ImGui.TextWrapped("To use the plugin you must be in Group Pose.");
         }
+    }
+
+    private void PrintPreset(ref cameraPreset preset)
+    {
+        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.6f, 0.6f, 0.6f, 1f));
+        ImGui.TextWrapped("Mode: Character Position");  // TODO
+        ImGui.Text($"Zoom: {preset.distance} , FoV: {preset.zoomFoV + preset.gposeFoV:F3}");
+        ImGui.Text($"H: {preset.hRotation * (180 / Math.PI):F2}\x00B0 , V: {preset.vRotation * (180 / Math.PI):F2}\x00B0");
+        ImGui.Text($"Pan: {preset.pan * (180 / Math.PI):F0}\x00B0 , Tilt: {preset.tilt * (180 / Math.PI):F0}\x00B0 , Roll: {preset.roll * (180 / Math.PI):F0}\x00B0");
+        ImGui.PopStyleColor(1);
     }
 
     private void SavePreset()
