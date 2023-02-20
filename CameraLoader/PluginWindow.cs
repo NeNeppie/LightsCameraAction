@@ -1,5 +1,6 @@
 ﻿using Dalamud.Interface.Windowing;
 using Dalamud.Logging;
+using CameraLoader.Utils;
 using System.Numerics;
 using System;
 
@@ -106,8 +107,14 @@ public unsafe class PluginWindow : Window
         ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.6f, 0.6f, 0.6f, 1f));
         ImGui.TextWrapped("Mode: Character Position");  // TODO
         ImGui.Text($"Zoom: {preset.distance} , FoV: {preset.zoomFoV + preset.gposeFoV:F3}");
-        ImGui.Text($"H: {preset.hRotation * (180 / Math.PI):F2}\x00B0 , V: {preset.vRotation * (180 / Math.PI):F2}\x00B0");
-        ImGui.Text($"Pan: {preset.pan * (180 / Math.PI):F0}\x00B0 , Tilt: {preset.tilt * (180 / Math.PI):F0}\x00B0 , Roll: {preset.roll * (180 / Math.PI):F0}\x00B0");
+        ImGui.Text($"H: {MathUtils.RadToDeg(preset.hRotation):F2}\x00B0 , V: {MathUtils.RadToDeg(preset.vRotation):F2}\x00B0");
+
+        ImGui.Text($"Pan: {MathUtils.RadToDeg(preset.pan):F0}\x00B0 , ");
+        ImGui.SameLine();
+        ImGui.Text($"Tilt: {MathUtils.RadToDeg(preset.tilt):F0}\x00B0 , ");
+        ImGui.SameLine();
+        ImGui.Text($"Roll: {MathUtils.RadToDeg(preset.roll):F0}\x00B0");
+
         ImGui.PopStyleColor(1);
     }
 
@@ -115,7 +122,7 @@ public unsafe class PluginWindow : Window
     {
         float cameraRot = _camera->HRotation;
         float playerRot = (float)Service.ClientState.LocalPlayer?.Rotation;
-        float relativeRot = CameraToRelative(cameraRot, playerRot);
+        float relativeRot = MathUtils.CameraToRelative(cameraRot, playerRot);
 
         cameraPreset preset = new cameraPreset(++Service.Config.numOfPresets);
         preset.distance = _camera->Distance;
@@ -134,7 +141,7 @@ public unsafe class PluginWindow : Window
     private void LoadPreset(ref cameraPreset preset)
     {
         _camera->Distance = preset.distance;
-        _camera->HRotation = RelativeToCamera(preset.hRotation, (float)Service.ClientState.LocalPlayer?.Rotation);
+        _camera->HRotation = MathUtils.RelativeToCamera(preset.hRotation, (float)Service.ClientState.LocalPlayer?.Rotation);
         _camera->VRotation = preset.vRotation;
         _camera->FoV = preset.zoomFoV;
         _camera->AddedFoV = preset.gposeFoV;
@@ -148,25 +155,5 @@ public unsafe class PluginWindow : Window
         Service.Config.presets.Remove(preset);
         Service.Config.numOfPresets--;
         Service.Config.Save();
-    }
-
-    private float CameraToRelative(float camRot, float playerRot)
-    {
-        camRot -= playerRot;
-
-        while (camRot > Math.PI) { camRot -= (float)Math.Tau; }
-        while (camRot < -Math.PI) { camRot += (float)Math.Tau; }
-
-        return camRot;
-    }
-
-    private float RelativeToCamera(float relRot, float playerRot)
-    {
-        relRot += playerRot;
-
-        while (relRot > Math.PI) { relRot -= (float)Math.Tau; }
-        while (relRot < -Math.PI) { relRot += (float)Math.Tau; }
-
-        return relRot;
     }
 }
