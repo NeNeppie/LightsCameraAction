@@ -14,6 +14,7 @@ public unsafe class PluginWindow : Window
 
     private bool _renameOpen = false;
     private int _primaryFocus = -1;
+    private static int _presetMode = (int)PresetMode.Character;
 
     public PluginWindow() : base("CameraLoader")
     {
@@ -46,6 +47,10 @@ public unsafe class PluginWindow : Window
             SavePreset();
         }
         ImGui.PopStyleColor(3);
+
+        ImGui.Text("Preset Mode:");
+        ImGui.RadioButton("Character Position", ref _presetMode, (int)PresetMode.Character); ImGui.SameLine();
+        ImGui.RadioButton("Camera Position", ref _presetMode, (int)PresetMode.Camera);
 
         ImGui.BeginChild("Preset Menu", ImGui.GetContentRegionAvail(), true);
 
@@ -103,14 +108,12 @@ public unsafe class PluginWindow : Window
     private void PrintPreset(ref cameraPreset preset)
     {
         ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.6f, 0.6f, 0.6f, 1f));
-        ImGui.TextWrapped("Mode: Character Position");  // TODO
+        ImGui.TextWrapped($"Mode: {(PresetMode)preset.positionMode} Position");
         ImGui.Text($"Zoom: {preset.distance} , FoV: {preset.zoomFoV + preset.gposeFoV:F3}");
         ImGui.Text($"H: {MathUtils.RadToDeg(preset.hRotation):F2}\x00B0 , V: {MathUtils.RadToDeg(preset.vRotation):F2}\x00B0");
 
-        ImGui.Text($"Pan: {MathUtils.RadToDeg(preset.pan):F0}\x00B0 , ");
-        ImGui.SameLine();
-        ImGui.Text($"Tilt: {MathUtils.RadToDeg(preset.tilt):F0}\x00B0 , ");
-        ImGui.SameLine();
+        ImGui.Text($"Pan: {MathUtils.RadToDeg(preset.pan):F0}\x00B0 , "); ImGui.SameLine();
+        ImGui.Text($"Tilt: {MathUtils.RadToDeg(preset.tilt):F0}\x00B0 , "); ImGui.SameLine();
         ImGui.Text($"Roll: {MathUtils.RadToDeg(preset.roll):F0}\x00B0");
 
         ImGui.PopStyleColor(1);
@@ -118,11 +121,18 @@ public unsafe class PluginWindow : Window
 
     private void SavePreset()
     {
-        float cameraRot = _camera->HRotation;
-        float playerRot = (float)Service.ClientState.LocalPlayer?.Rotation;
-        float relativeRot = MathUtils.CameraToRelative(cameraRot, playerRot);
-
         cameraPreset preset = new cameraPreset(++Service.Config.numOfPresets);
+
+        float cameraRot = _camera->HRotation;
+        float relativeRot = cameraRot;
+
+        if (_presetMode == (int)PresetMode.Character)
+        {
+            float playerRot = (float)Service.ClientState.LocalPlayer?.Rotation;
+            relativeRot = MathUtils.CameraToRelative(cameraRot, playerRot);
+        }
+
+        preset.positionMode = _presetMode;
         preset.distance = _camera->Distance;
         preset.hRotation = relativeRot;
         preset.vRotation = _camera->VRotation;
@@ -138,8 +148,14 @@ public unsafe class PluginWindow : Window
 
     private void LoadPreset(ref cameraPreset preset)
     {
+        float hRotation = preset.hRotation;
+        if (preset.positionMode == (int)PresetMode.Character)
+        {
+            hRotation = MathUtils.RelativeToCamera(preset.hRotation, (float)Service.ClientState.LocalPlayer?.Rotation);
+        }
+
         _camera->Distance = preset.distance;
-        _camera->HRotation = MathUtils.RelativeToCamera(preset.hRotation, (float)Service.ClientState.LocalPlayer?.Rotation);
+        _camera->HRotation = hRotation;
         _camera->VRotation = preset.vRotation;
         _camera->FoV = preset.zoomFoV;
         _camera->AddedFoV = preset.gposeFoV;

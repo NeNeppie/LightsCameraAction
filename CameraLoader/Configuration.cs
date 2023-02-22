@@ -5,10 +5,17 @@ using System;
 
 namespace CameraLoader;
 
+public enum PresetMode
+{
+    Character,
+    Camera
+}
+
 [Serializable]
 public class cameraPreset
 {
     public string name { get; set; } = "";
+    public int positionMode { get; set; }
 
     public float distance { get; set; }
     public float hRotation { get; set; }
