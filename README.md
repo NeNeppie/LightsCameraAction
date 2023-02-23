@@ -1,21 +1,18 @@
 # CameraLoader for Dalamud
 Ever wished you could save multiple camera presets at any given time?
 
-Ever took a screenshot with that perfect angle? The ultimate selfie, a beautiful shot of a vista, a glorious picture of your static, or a vertical image showcasing your glam? And as you're about to exit GPose you think to yourself, "I should save this angle for later! But I already have some settings saved for another occasion... Now, which one do I choose..."
-
-I know I have. Well, you no longer need to choose! This plugin lets you save as many presets as you want!
+This plugin lets you save unlimited camera configurations/presets in GPose at a time, vastly improving over the vanilla feature which lets you save only one. This makes taking quality screenshots easier and more consistent.
 
 (Only useable within GPose. You cannot use the plugin in regular gameplay because things will probably break)
 
-# Presets
-A preset has all of the information GPose itself uses, and presets are currently saved in relation to where the player is facing. In GPose this is known as "Character Position" under Save Preferences. I plan to include the second option, "Camera Position", in a later version.
-
+# Settings
 A preset includes:
-* Distance from the player
-* Horizontal rotation angle (In relation to the player)
+* Relativity mode (This is known in GPose as Character/Camera Position, under Save Preferences)
+* Distance from the player, or simply Zoom
+* Horizontal rotation angle (Affected by the aforementioned relativity mode)
 * Vertical rotation angle
 * FoV
 * Roll angle
-* Pan & Tilt (Mentioned on the blue instructions window found in GPose)
+* Pan & Tilt (Mentioned on the blue instructions window within GPose)
 
 Note that 3rd Person Camera Angle (The setting found in Character Configuration) is not saved.
