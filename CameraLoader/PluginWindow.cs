@@ -58,7 +58,7 @@ public unsafe class PluginWindow : Window
         ImGui.PopStyleVar(1);
 
         ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
-        ImGui.InputTextWithHint("##Search", "Search...", ref _searchQuery, 30); ImGui.SameLine();
+        ImGui.InputTextWithHint("##Search", "Search...", ref _searchQuery, 30);
         ImGui.PopItemWidth();
 
         for (int i = 0; i < Service.Config.numOfPresets; i++)
