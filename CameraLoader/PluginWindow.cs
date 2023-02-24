@@ -14,6 +14,7 @@ public unsafe class PluginWindow : Window
 
     private bool _renameOpen = false;
     private int _primaryFocus = -1;
+    private string _searchQuery = "";
     private static int _presetMode = (int)PresetMode.Character;
 
     public PluginWindow() : base("CameraLoader")
@@ -39,6 +40,10 @@ public unsafe class PluginWindow : Window
             return;
         }
 
+        ImGui.Text("Preset Mode:");
+        ImGui.RadioButton("Character Position", ref _presetMode, (int)PresetMode.Character); ImGui.SameLine();
+        ImGui.RadioButton("Camera Position", ref _presetMode, (int)PresetMode.Camera);
+
         ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.2f, 0.8f, 0.41f, 0.7f));
         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.2f, 0.9f, 0.41f, 0.7f));
         ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.2f, 1f, 0.41f, 0.7f));
@@ -48,15 +53,19 @@ public unsafe class PluginWindow : Window
         }
         ImGui.PopStyleColor(3);
 
-        ImGui.Text("Preset Mode:");
-        ImGui.RadioButton("Character Position", ref _presetMode, (int)PresetMode.Character); ImGui.SameLine();
-        ImGui.RadioButton("Camera Position", ref _presetMode, (int)PresetMode.Camera);
-
+        ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0f);
         ImGui.BeginChild("Preset Menu", ImGui.GetContentRegionAvail(), true);
+        ImGui.PopStyleVar(1);
+
+        ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
+        ImGui.InputTextWithHint("##Search", "Search...", ref _searchQuery, 30); ImGui.SameLine();
+        ImGui.PopItemWidth();
 
         for (int i = 0; i < Service.Config.numOfPresets; i++)
         {
             var preset = Service.Config.presets[i];
+            if (!preset.name.ToLower().Contains(_searchQuery.ToLower())) { continue; }
+
             if (ImGui.TreeNode($"{preset.name}##{i}"))
             {
                 PrintPreset(ref preset);
