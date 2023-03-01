@@ -22,6 +22,7 @@ public unsafe struct GameCamera
     [FieldOffset(0x150)] public float Pan;          // -0.872664 to 0.872664, default is 0
     [FieldOffset(0x154)] public float Tilt;         // -0.646332 to 0.3417, affected by third person angle. default is 0
     [FieldOffset(0x160)] public float Roll;         // -pi -> pi, default is 0
+    [FieldOffset(0x170)] public int Mode;           // 0 = 1st Person. 1 = 3rd Person. 2+ = Restrictive camera control 
 }
 
 [StructLayout(LayoutKind.Explicit)]

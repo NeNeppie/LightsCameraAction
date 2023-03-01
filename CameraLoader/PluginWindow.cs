@@ -13,6 +13,7 @@ public unsafe class PluginWindow : Window
     private GameCamera* _camera;
 
     private bool _renameOpen = false;
+    private int _renamedIndex = -1;
     private int _primaryFocus = -1;
     private string _searchQuery = "";
     private static int _presetMode = (int)PresetMode.Character;
@@ -32,7 +33,7 @@ public unsafe class PluginWindow : Window
     {
         if (!IsOpen) { return; }
 
-        bool isInCameraMode = Service.ClientState.LocalPlayer?.OnlineStatus.Id == 18;
+        bool isInCameraMode = Service.Conditions[Dalamud.Game.ClientState.Conditions.ConditionFlag.WatchingCutscene];
         bool gposeActorExists = Service.ObjectTable[201] != null;
         if (!(isInCameraMode && gposeActorExists))
         {
@@ -65,6 +66,13 @@ public unsafe class PluginWindow : Window
         {
             var preset = Service.Config.presets[i];
             if (!preset.name.ToLower().Contains(_searchQuery.ToLower())) { continue; }
+
+            if (_renamedIndex == i)
+            {
+                ImGui.SetNextItemOpen(true);
+                this._primaryFocus = -1;
+                this._renamedIndex = _primaryFocus;
+            }
 
             if (ImGui.TreeNode($"{preset.name}##{i}"))
             {
@@ -105,7 +113,7 @@ public unsafe class PluginWindow : Window
                         preset.name = newName;
                         Service.Config.Save();
                         this._renameOpen = false;
-                        this._primaryFocus = -1;
+                        this._renamedIndex = _primaryFocus;
                     }
                 }
                 ImGui.TreePop();
@@ -141,6 +149,9 @@ public unsafe class PluginWindow : Window
             relativeRot = MathUtils.CameraToRelative(cameraRot, playerRot);
         }
 
+        // First Person Mode
+        if (_camera->Mode == 0) { relativeRot = MathUtils.SubPiRad(relativeRot); }
+
         preset.positionMode = _presetMode;
         preset.distance = _camera->Distance;
         preset.hRotation = relativeRot;
@@ -162,6 +173,9 @@ public unsafe class PluginWindow : Window
         {
             hRotation = MathUtils.RelativeToCamera(preset.hRotation, (float)Service.ClientState.LocalPlayer?.Rotation);
         }
+
+        // First Person Mode
+        if (_camera->Mode == 0) { hRotation = MathUtils.AddPiRad(hRotation); }
 
         _camera->Distance = preset.distance;
         _camera->HRotation = hRotation;
