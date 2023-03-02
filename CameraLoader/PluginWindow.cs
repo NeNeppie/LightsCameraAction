@@ -14,6 +14,7 @@ public unsafe class PluginWindow : Window
 
     private bool _renameOpen = false;
     private int _renamedIndex = -1;
+    private int _invalidIndex = -1;
     private int _primaryFocus = -1;
     private string _searchQuery = "";
     private static int _presetMode = (int)PresetMode.Character;
@@ -79,7 +80,11 @@ public unsafe class PluginWindow : Window
                 PrintPreset(ref preset);
                 if (ImGui.Button("Load Preset"))
                 {
-                    LoadPreset(ref preset);
+                    if (!LoadPreset(ref preset))
+                    {
+                        PluginLog.Information($"Attempted to load an invalid preset \"{preset.name}\"");
+                        this._invalidIndex = i;
+                    }
                 }
                 ImGui.SameLine();
                 // Show / Hide the rename input box
@@ -105,7 +110,7 @@ public unsafe class PluginWindow : Window
                     this._primaryFocus = -1;
                 }
 
-                if (this._renameOpen && this._primaryFocus == i)
+                if (_renameOpen && _primaryFocus == i)
                 {
                     string newName = preset.name;
                     if (ImGui.InputText("##Rename(Input)", ref newName, 30, ImGuiInputTextFlags.EnterReturnsTrue))
@@ -115,6 +120,11 @@ public unsafe class PluginWindow : Window
                         this._renameOpen = false;
                         this._renamedIndex = _primaryFocus;
                     }
+                }
+
+                if (_invalidIndex == i)
+                {
+                    ImGui.TextColored(new Vector4(1, 0, 0, 1), "Error: Preset contains invalid values");
                 }
                 ImGui.TreePop();
             }
@@ -166,8 +176,28 @@ public unsafe class PluginWindow : Window
         Service.Config.Save();
     }
 
-    private void LoadPreset(ref cameraPreset preset)
+    private bool isValidPreset(ref cameraPreset preset)
     {
+        // Zoom check.
+        // Breaks below Min distance. Doesn't go above Max, but Max can be externally modified
+        if (preset.distance < 1.5 || preset.distance > 20) { return false; }
+
+        // FoV check.
+        // Zoom FoV carries outside of gpose! Negative values flip the screen, High positive values are effectively a zoom hack
+        // Gpose FoV resets when exiting gpose, but we don't want people suddenly entering gpose during a fight.
+        if (preset.zoomFoV < 0.69 || preset.zoomFoV > 0.78 || preset.gposeFoV < -0.5 || preset.gposeFoV > 0.5) { return false; }
+
+        // Pan and Tilt check.
+        // Both reset when exiting gpose, but can still be modified beyond the limits the game sets
+        if (preset.pan < -0.873 || preset.pan > 0.873 || preset.tilt < -0.647 || preset.tilt > 0.342) { return false; }
+
+        return true;
+    }
+
+    private bool LoadPreset(ref cameraPreset preset)
+    {
+        if (!isValidPreset(ref preset)) { return false; }
+
         float hRotation = preset.hRotation;
         if (preset.positionMode == (int)PresetMode.Character)
         {
@@ -185,6 +215,8 @@ public unsafe class PluginWindow : Window
         _camera->Pan = preset.pan;
         _camera->Tilt = preset.tilt;
         _camera->Roll = preset.roll;
+
+        return true;
     }
 
     private void DeletePreset(ref cameraPreset preset)
