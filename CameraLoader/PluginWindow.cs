@@ -155,7 +155,7 @@ public unsafe class PluginWindow : Window
 
         if (_presetMode == (int)PresetMode.Character)
         {
-            float playerRot = (float)Service.ClientState.LocalPlayer?.Rotation;
+            float playerRot = Service.ClientState.LocalPlayer?.Rotation ?? 0f;
             relativeRot = MathUtils.CameraToRelative(cameraRot, playerRot);
         }
 
@@ -201,7 +201,8 @@ public unsafe class PluginWindow : Window
         float hRotation = preset.hRotation;
         if (preset.positionMode == (int)PresetMode.Character)
         {
-            hRotation = MathUtils.RelativeToCamera(preset.hRotation, (float)Service.ClientState.LocalPlayer?.Rotation);
+            float playerRot = Service.ClientState.LocalPlayer?.Rotation ?? 0f;
+            hRotation = MathUtils.RelativeToCamera(preset.hRotation, playerRot);
         }
 
         // First Person Mode
