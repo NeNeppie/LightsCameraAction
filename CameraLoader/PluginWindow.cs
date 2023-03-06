@@ -1,4 +1,4 @@
-﻿using Dalamud.Interface.Windowing;
+using Dalamud.Interface.Windowing;
 using Dalamud.Logging;
 using CameraLoader.Utils;
 using System.Numerics;
@@ -180,16 +180,16 @@ public unsafe class PluginWindow : Window
     {
         // Zoom check.
         // Breaks below Min distance. Doesn't go above Max, but Max can be externally modified
-        if (preset.distance < 1.5 || preset.distance > 20) { return false; }
+        if (preset.distance < 1.5f || preset.distance > 20f) { return false; }
 
         // FoV check.
         // Zoom FoV carries outside of gpose! Negative values flip the screen, High positive values are effectively a zoom hack
         // Gpose FoV resets when exiting gpose, but we don't want people suddenly entering gpose during a fight.
-        if (preset.zoomFoV < 0.69 || preset.zoomFoV > 0.78 || preset.gposeFoV < -0.5 || preset.gposeFoV > 0.5) { return false; }
+        if (preset.zoomFoV < 0.69f || preset.zoomFoV > 0.78f || preset.gposeFoV < -0.5f || preset.gposeFoV > 0.5f) { return false; }
 
         // Pan and Tilt check.
         // Both reset when exiting gpose, but can still be modified beyond the limits the game sets
-        if (preset.pan < -0.873 || preset.pan > 0.873 || preset.tilt < -0.647 || preset.tilt > 0.342) { return false; }
+        if (preset.pan < -0.873f || preset.pan > 0.873f || preset.tilt < -0.647f || preset.tilt > 0.342f) { return false; }
 
         return true;
     }
