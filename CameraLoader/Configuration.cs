@@ -12,24 +12,24 @@ public enum PresetMode
 }
 
 [Serializable]
-public class cameraPreset
+public class CameraPreset
 {
-    public string name { get; set; } = "";
-    public int positionMode { get; set; }
+    public string Name { get; set; } = "";
+    public int PositionMode { get; set; }
 
-    public float distance { get; set; }
-    public float hRotation { get; set; }
-    public float vRotation { get; set; }
-    public float zoomFoV { get; set; }  // Applies when zooming in very closely
-    public float gposeFoV { get; set; } // Can be adjusted in the GPose settings menu
-    public float pan { get; set; }
-    public float tilt { get; set; }
-    public float roll { get; set; }
+    public float Distance { get; set; }
+    public float HRotation { get; set; }
+    public float VRotation { get; set; }
+    public float ZoomFoV { get; set; }  // Applies when zooming in very closely
+    public float GposeFoV { get; set; } // Can be adjusted in the GPose settings menu
+    public float Pan { get; set; }
+    public float Tilt { get; set; }
+    public float Roll { get; set; }
 
-    public cameraPreset() { }
-    public cameraPreset(int index)
+    public CameraPreset() { }
+    public CameraPreset(string name)
     {
-        this.name = $"Preset No.{index}";
+        this.Name = name;
     }
 }
 
@@ -37,15 +37,19 @@ public class cameraPreset
 public class Configuration : IPluginConfiguration
 {
     public int Version { get; set; } = 0;
-    public int numOfPresets = 0;
-    public List<cameraPreset> presets = new();
+    public List<CameraPreset> Presets = new();
 
     [NonSerialized]
+    public HashSet<string> PresetNames = new();
     private DalamudPluginInterface _pluginInterface;
 
     public void Initialize(DalamudPluginInterface pi)
     {
         this._pluginInterface = pi;
+        foreach (var preset in Presets)
+        {
+            PresetNames.Add(preset.Name);
+        }
     }
 
     public void Save()
