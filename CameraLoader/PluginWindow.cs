@@ -12,8 +12,8 @@ public unsafe class PluginWindow : Window
 {
     private GameCamera* _camera;
 
-    private bool _renameOpen = false;
     private int _renamedIndex = -1;
+    private bool _renameOpen = false;
 
     private int _errorIndex = -1;
     private string _errorMessage = "";
@@ -47,7 +47,15 @@ public unsafe class PluginWindow : Window
 
         ImGui.Text("Preset Mode:");
         ImGui.RadioButton("Character Position", ref _presetMode, (int)PresetMode.Character); ImGui.SameLine();
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip("Presets are saved and loaded relative to your character's orientation");
+        }
         ImGui.RadioButton("Camera Position", ref _presetMode, (int)PresetMode.Camera);
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip("Presets are saved relative to the camera's current orientation.\nYour character's orientation is not taken into account");
+        }
 
         ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.2f, 0.8f, 0.41f, 0.7f));
         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.2f, 0.9f, 0.41f, 0.7f));
@@ -145,9 +153,12 @@ public unsafe class PluginWindow : Window
 
     private void PrintPreset(ref CameraPreset preset)
     {
+        string foVFormatted = preset.GposeFoV > 0 ? $"({preset.ZoomFoV:F2}+{preset.GposeFoV})" : $"({preset.ZoomFoV:F2}{preset.GposeFoV})";
+
         ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.6f, 0.6f, 0.6f, 1f));
+
         ImGui.TextWrapped($"Mode: {(PresetMode)preset.PositionMode} Position");
-        ImGui.Text($"Zoom: {preset.Distance} , FoV: {preset.ZoomFoV + preset.GposeFoV:F3}");
+        ImGui.Text($"Zoom: {preset.Distance} , FoV: {(preset.ZoomFoV + preset.GposeFoV):F2} " + foVFormatted);
         ImGui.Text($"H: {MathUtils.RadToDeg(preset.HRotation):F2}\x00B0 , V: {MathUtils.RadToDeg(preset.VRotation):F2}\x00B0");
 
         ImGui.Text($"Pan: {MathUtils.RadToDeg(preset.Pan):F0}\x00B0 , "); ImGui.SameLine();
