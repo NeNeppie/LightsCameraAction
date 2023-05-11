@@ -10,8 +10,6 @@ namespace CameraLoader;
 
 public unsafe class PluginWindow : Window
 {
-    private GameCamera* _camera;
-
     private int _renamedIndex = -1;
     private bool _renameOpen = false;
 
@@ -27,10 +25,6 @@ public unsafe class PluginWindow : Window
         IsOpen = false;
         Size = new Vector2(305, 420);
         SizeCondition = ImGuiCond.FirstUseEver;
-
-        var cameraManager = (CameraManager*)Service.SigScanner.GetStaticAddressFromSig("4C 8D 35 ?? ?? ?? ?? 85 D2");
-        this._camera = cameraManager->WorldCamera;
-        PluginLog.Debug($"Camera memory @ {((IntPtr)this._camera).ToString("X")}");
     }
 
     public override void Draw()
@@ -62,7 +56,10 @@ public unsafe class PluginWindow : Window
         ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.2f, 1f, 0.41f, 0.7f));
         if (ImGui.Button($"Create a new preset", new Vector2(ImGui.GetContentRegionAvail().X, 40f)))
         {
-            SavePreset();
+            var preset = new CameraPreset(_presetMode);
+            Service.Config.PresetNames.Add(preset.Name);
+            Service.Config.Presets.Add(preset);
+            Service.Config.Save();
         }
         ImGui.PopStyleColor(3);
 
@@ -91,7 +88,7 @@ public unsafe class PluginWindow : Window
                 PrintPreset(ref preset);
                 if (ImGui.Button("Load Preset"))
                 {
-                    if (!LoadPreset(ref preset))
+                    if (!preset.Load())
                     {
                         PluginLog.Information($"Attempted to load an invalid preset \"{preset.Name}\"");
                         this._errorIndex = i;
@@ -127,8 +124,13 @@ public unsafe class PluginWindow : Window
                     string newName = preset.Name;
                     if (ImGui.InputText("##Rename(Input)", ref newName, 30, ImGuiInputTextFlags.EnterReturnsTrue))
                     {
-                        if (RenamePreset(ref preset, newName))
+                        var oldName = preset.Rename(newName);
+                        if (oldName != null)
                         {
+                            Service.Config.PresetNames.Remove(oldName);
+                            Service.Config.PresetNames.Add(newName);
+                            Service.Config.Save();
+
                             this._renameOpen = false;
                             this._renamedIndex = _primaryFocus;
                             this._errorIndex = -1;
@@ -166,104 +168,6 @@ public unsafe class PluginWindow : Window
         ImGui.Text($"Roll: {MathUtils.RadToDeg(preset.Roll):F0}\x00B0");
 
         ImGui.PopStyleColor(1);
-    }
-
-    private void SavePreset()
-    {
-        string presetName = "";
-        for (int i = 1; i <= Service.Config.Presets.Count + 1; i++)
-        {
-            presetName = $"Preset #{i}";
-            if (!Service.Config.PresetNames.Contains(presetName))
-            {
-                break;
-            }
-        }
-        CameraPreset preset = new CameraPreset(presetName);
-
-        float cameraRot = _camera->HRotation;
-        float relativeRot = cameraRot;
-
-        if (_presetMode == (int)PresetMode.Character)
-        {
-            float playerRot = Service.ClientState.LocalPlayer?.Rotation ?? 0f;
-            relativeRot = MathUtils.CameraToRelative(cameraRot, playerRot);
-        }
-
-        // First Person Mode
-        if (_camera->Mode == 0) { relativeRot = MathUtils.SubPiRad(relativeRot); }
-
-        preset.PositionMode = _presetMode;
-        preset.Distance = _camera->Distance;
-        preset.HRotation = relativeRot;
-        preset.VRotation = _camera->VRotation;
-        preset.ZoomFoV = _camera->FoV;
-        preset.GposeFoV = _camera->AddedFoV;
-        preset.Pan = _camera->Pan;
-        preset.Tilt = _camera->Tilt;
-        preset.Roll = _camera->Roll;
-
-        Service.Config.PresetNames.Add(presetName);
-        Service.Config.Presets.Add(preset);
-        Service.Config.Save();
-    }
-
-    private bool isValidPreset(ref CameraPreset preset)
-    {
-        // Zoom check.
-        // Breaks below Min distance. Doesn't go above Max, but Max can be externally modified
-        if (preset.Distance < 1.5f || preset.Distance > 20f) { return false; }
-
-        // FoV check.
-        // Zoom FoV carries outside of gpose! Negative values flip the screen, High positive values are effectively a zoom hack
-        // Gpose FoV resets when exiting gpose, but we don't want people suddenly entering gpose during a fight.
-        if (preset.ZoomFoV < 0.69f || preset.ZoomFoV > 0.78f || preset.GposeFoV < -0.5f || preset.GposeFoV > 0.5f) { return false; }
-
-        // Pan and Tilt check.
-        // Both reset when exiting gpose, but can still be modified beyond the limits the game sets
-        if (preset.Pan < -0.873f || preset.Pan > 0.873f || preset.Tilt < -0.647f || preset.Tilt > 0.342f) { return false; }
-
-        return true;
-    }
-
-    private bool LoadPreset(ref CameraPreset preset)
-    {
-        if (!isValidPreset(ref preset)) { return false; }
-
-        float hRotation = preset.HRotation;
-        if (preset.PositionMode == (int)PresetMode.Character)
-        {
-            float playerRot = Service.ClientState.LocalPlayer?.Rotation ?? 0f;
-            hRotation = MathUtils.RelativeToCamera(preset.HRotation, playerRot);
-        }
-
-        // First Person Mode
-        if (_camera->Mode == 0) { hRotation = MathUtils.AddPiRad(hRotation); }
-
-        _camera->Distance = preset.Distance;
-        _camera->HRotation = hRotation;
-        _camera->VRotation = preset.VRotation;
-        _camera->FoV = preset.ZoomFoV;
-        _camera->AddedFoV = preset.GposeFoV;
-        _camera->Pan = preset.Pan;
-        _camera->Tilt = preset.Tilt;
-        _camera->Roll = preset.Roll;
-
-        return true;
-    }
-
-    private bool RenamePreset(ref CameraPreset preset, string name)
-    {
-        if (Service.Config.PresetNames.Contains(name))
-        {
-            PluginLog.Information($"Couldn't rename preset \"{preset.Name}\" to \"{name}\" - Name is taken");
-            return false;
-        }
-        Service.Config.PresetNames.Remove(preset.Name);
-        preset.Name = name;
-        Service.Config.PresetNames.Add(name);
-        Service.Config.Save();
-        return true;
     }
 
     private void DeletePreset(ref CameraPreset preset)

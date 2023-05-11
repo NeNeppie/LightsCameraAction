@@ -5,34 +5,6 @@ using System;
 
 namespace CameraLoader;
 
-public enum PresetMode
-{
-    Character,
-    Camera
-}
-
-[Serializable]
-public class CameraPreset
-{
-    public string Name { get; set; } = "";
-    public int PositionMode { get; set; }
-
-    public float Distance { get; set; }
-    public float HRotation { get; set; }
-    public float VRotation { get; set; }
-    public float ZoomFoV { get; set; }  // Applies when zooming in very closely
-    public float GposeFoV { get; set; } // Can be adjusted in the GPose settings menu
-    public float Pan { get; set; }
-    public float Tilt { get; set; }
-    public float Roll { get; set; }
-
-    public CameraPreset() { }
-    public CameraPreset(string name)
-    {
-        this.Name = name;
-    }
-}
-
 [Serializable]
 public class Configuration : IPluginConfiguration
 {
