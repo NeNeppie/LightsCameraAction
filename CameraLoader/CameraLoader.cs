@@ -1,9 +1,10 @@
-﻿using Dalamud.Plugin;
+﻿using System;
 using Dalamud.Game.Command;
 using Dalamud.Interface.Windowing;
+using Dalamud.Plugin;
+
 using CameraLoader.Attributes;
 using CameraLoader.UI;
-using System;
 
 namespace CameraLoader;
 

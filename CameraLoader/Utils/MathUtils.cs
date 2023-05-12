@@ -1,4 +1,3 @@
-using System.Numerics;
 using System;
 
 namespace CameraLoader.Utils;

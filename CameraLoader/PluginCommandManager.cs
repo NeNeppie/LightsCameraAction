@@ -1,10 +1,11 @@
-using Dalamud.Game.Command;
-using CameraLoader.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Dalamud.Game.Command;
 using static Dalamud.Game.Command.CommandInfo;
+
+using CameraLoader.Attributes;
 
 namespace CameraLoader;
 

@@ -1,6 +1,7 @@
 using System;
-using CameraLoader.Utils;
 using Dalamud.Logging;
+
+using CameraLoader.Utils;
 
 namespace CameraLoader;
 

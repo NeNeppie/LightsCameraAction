@@ -1,7 +1,7 @@
-﻿using Dalamud.Configuration;
-using Dalamud.Plugin;
+﻿using System;
 using System.Collections.Generic;
-using System;
+using Dalamud.Configuration;
+using Dalamud.Plugin;
 
 namespace CameraLoader;
 

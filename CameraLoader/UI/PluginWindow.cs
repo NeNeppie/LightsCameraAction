@@ -1,8 +1,5 @@
-﻿using Dalamud.Interface.Windowing;
-using Dalamud.Logging;
-using CameraLoader.Utils;
-using System.Numerics;
-using System;
+﻿using System.Numerics;
+using Dalamud.Interface.Windowing;
 
 using ImGuiNET;
 

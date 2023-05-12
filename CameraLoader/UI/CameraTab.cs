@@ -1,7 +1,8 @@
 using System;
 using System.Numerics;
-using CameraLoader.Utils;
 using Dalamud.Logging;
+
+using CameraLoader.Utils;
 
 using ImGuiNET;
 
