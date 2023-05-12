@@ -1,14 +1,18 @@
-﻿using Dalamud.Interface.Windowing;
-using Dalamud.Logging;
-using CameraLoader.Utils;
-using System.Numerics;
 using System;
+using System.Numerics;
+using CameraLoader.Utils;
+using Dalamud.Logging;
 
 using ImGuiNET;
 
-namespace CameraLoader;
+namespace CameraLoader.UI;
 
-public unsafe class PluginWindow : Window
+// Draw()
+// DrawCompact()
+// PrintPreset()
+// RemovePreset()
+
+public partial class PluginWindow
 {
     private int _renamedIndex = -1;
     private bool _renameOpen = false;
@@ -20,22 +24,14 @@ public unsafe class PluginWindow : Window
     private string _searchQuery = "";
     private static int _presetMode = (int)PresetMode.Character;
 
-    public PluginWindow() : base("CameraLoader")
+    public void DrawCameraTab()
     {
-        IsOpen = false;
-        Size = new Vector2(305, 420);
-        SizeCondition = ImGuiCond.FirstUseEver;
-    }
-
-    public override void Draw()
-    {
-        if (!IsOpen) { return; }
-
+        // Drawing here
         bool isInCameraMode = Service.Conditions[Dalamud.Game.ClientState.Conditions.ConditionFlag.WatchingCutscene];
         bool gposeActorExists = Service.ObjectTable[201] != null;
         if (!(isInCameraMode && gposeActorExists))
         {
-            ImGui.TextWrapped("To use the plugin you must be in Group Pose.");
+            ImGui.TextWrapped("Unavailable outside of Group Pose");
             return;
         }
 
@@ -51,17 +47,13 @@ public unsafe class PluginWindow : Window
             ImGui.SetTooltip("Presets are saved relative to the camera's current orientation.\nYour character's orientation is not taken into account");
         }
 
-        ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.2f, 0.8f, 0.41f, 0.7f));
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.2f, 0.9f, 0.41f, 0.7f));
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.2f, 1f, 0.41f, 0.7f));
-        if (ImGui.Button($"Create a new preset", new Vector2(ImGui.GetContentRegionAvail().X, 40f)))
+        if (ImGuiUtils.ColoredButton($"Create a new preset", ImGuiUtils.Green, new Vector2(ImGui.GetContentRegionAvail().X, 40f)))
         {
             var preset = new CameraPreset(_presetMode);
             Service.Config.PresetNames.Add(preset.Name);
             Service.Config.Presets.Add(preset);
             Service.Config.Save();
         }
-        ImGui.PopStyleColor(3);
 
         ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0f);
         ImGui.BeginChild("Preset Menu", ImGui.GetContentRegionAvail(), true);
@@ -113,7 +105,7 @@ public unsafe class PluginWindow : Window
                 ImGui.SameLine();
                 if (ImGui.Button("Delete Preset"))
                 {
-                    DeletePreset(ref preset);
+                    RemovePreset(ref preset);
 
                     this._renameOpen = false;
                     this._primaryFocus = -1;
@@ -151,6 +143,7 @@ public unsafe class PluginWindow : Window
             }
         }
         ImGui.EndChild();
+        ImGui.EndTabItem();
     }
 
     private void PrintPreset(ref CameraPreset preset)
@@ -170,7 +163,7 @@ public unsafe class PluginWindow : Window
         ImGui.PopStyleColor(1);
     }
 
-    private void DeletePreset(ref CameraPreset preset)
+    private void RemovePreset(ref CameraPreset preset)
     {
         Service.Config.PresetNames.Remove(preset.Name);
         Service.Config.Presets.Remove(preset);
