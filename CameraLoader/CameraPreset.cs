@@ -48,7 +48,7 @@ public unsafe class CameraPreset
             }
         }
 
-        float cameraRot = HRotation;
+        float cameraRot = _camera->HRotation;
         float relativeRot = cameraRot;
 
         if (mode == (int)PresetMode.Character)

@@ -112,6 +112,7 @@ public partial class PluginWindow
             {
                 RemovePreset(ref _selectedPreset);
                 this._selected = -1;
+                this._selectedPreset = null;
             }
 
             if (_renameOpen)
