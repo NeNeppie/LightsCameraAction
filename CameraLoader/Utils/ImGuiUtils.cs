@@ -1,4 +1,5 @@
 using System.Numerics;
+using Dalamud.Interface;
 
 using ImGuiNET;
 
@@ -60,5 +61,42 @@ public static class ImGuiUtils
         // Tooltip is unaffected
         ImGui.PopStyleColor(3);
         return res;
+    }
+
+    public static bool IconButton(FontAwesomeIcon icon, Vector2 size = default, string tooltip = null, bool small = false)
+    {
+        var label = icon.ToIconString();
+
+        ImGui.PushFont(UiBuilder.IconFont);
+        bool res = small ? ImGui.SmallButton(label) : ImGui.Button(label, size);
+        ImGui.PopFont();
+
+        if (tooltip != null && ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip(tooltip);
+        }
+
+        return res;
+    }
+
+    public static bool ColoredIconButton(FontAwesomeIcon icon, ImGuiButtonColors colors, Vector2 size = default, string tooltip = null, bool small = false)
+    {
+        ImGui.PushStyleColor(ImGuiCol.Button, colors.Normal);
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, colors.Hovered);
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, colors.Active);
+
+        bool res = IconButton(icon, size, tooltip, small);
+
+        ImGui.PopStyleColor(3);
+        return res;
+    }
+
+    public static void IconText(FontAwesomeIcon icon)
+    {
+        var text = icon.ToIconString();
+
+        ImGui.PushFont(UiBuilder.IconFont);
+        ImGui.Text(text);
+        ImGui.PopFont();
     }
 }

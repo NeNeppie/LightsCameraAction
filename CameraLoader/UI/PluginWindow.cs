@@ -10,7 +10,7 @@ public partial class PluginWindow : Window
     public PluginWindow() : base("CameraLoader")
     {
         IsOpen = false;
-        Size = new Vector2(305, 420);
+        Size = new Vector2(250, 420);
         SizeCondition = ImGuiCond.FirstUseEver;
     }
 
@@ -18,6 +18,11 @@ public partial class PluginWindow : Window
     {
         if (!IsOpen) { return; }
 
-        DrawCameraTab();
+        if (ImGui.BeginTabBar("##TabBar", ImGuiTabBarFlags.None))
+        {
+            DrawCameraTab();
+            ImGui.EndTabBar();
+        }
+
     }
 }

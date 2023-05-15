@@ -1,6 +1,6 @@
-using System;
 using System.Numerics;
 using Dalamud.Logging;
+using Dalamud.Interface;
 
 using CameraLoader.Utils;
 
@@ -8,47 +8,51 @@ using ImGuiNET;
 
 namespace CameraLoader.UI;
 
-// Draw()
-// DrawCompact()
-// PrintPreset()
-// RemovePreset()
-
 public partial class PluginWindow
 {
-    private int _renamedIndex = -1;
+    private int _selected = -1;
     private bool _renameOpen = false;
-
-    private int _errorIndex = -1;
     private string _errorMessage = "";
-
-    private int _primaryFocus = -1;
     private string _searchQuery = "";
+
+    private CameraPreset _selectedPreset = null;
+
     private static int _presetMode = (int)PresetMode.Character;
 
     public void DrawCameraTab()
     {
+        bool res = ImGui.BeginTabItem("Camera##CameraTab");
+        if (!res) { return; }
+
         // Drawing here
         bool isInCameraMode = Service.Conditions[Dalamud.Game.ClientState.Conditions.ConditionFlag.WatchingCutscene];
         bool gposeActorExists = Service.ObjectTable[201] != null;
         if (!(isInCameraMode && gposeActorExists))
         {
             ImGui.TextWrapped("Unavailable outside of Group Pose");
+            ImGui.EndTabItem();
             return;
         }
 
+        ImGuiUtils.IconText(FontAwesomeIcon.CameraRetro); ImGui.SameLine();
         ImGui.Text("Preset Mode:");
-        ImGui.RadioButton("Character Position", ref _presetMode, (int)PresetMode.Character); ImGui.SameLine();
-        if (ImGui.IsItemHovered())
+        ImGui.BeginGroup();
         {
-            ImGui.SetTooltip("Presets are saved and loaded relative to your character's orientation");
+            ImGui.RadioButton("Character Position", ref _presetMode, (int)PresetMode.Character);
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.SetTooltip("Presets are saved and loaded relative to your character's orientation");
+            }
+            ImGui.RadioButton("Camera Position", ref _presetMode, (int)PresetMode.Camera);
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.SetTooltip("Presets are saved relative to the camera's current orientation.\nYour character's orientation is not taken into account");
+            }
         }
-        ImGui.RadioButton("Camera Position", ref _presetMode, (int)PresetMode.Camera);
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip("Presets are saved relative to the camera's current orientation.\nYour character's orientation is not taken into account");
-        }
+        ImGui.EndGroup();
 
-        if (ImGuiUtils.ColoredButton($"Create a new preset", ImGuiUtils.Green, new Vector2(ImGui.GetContentRegionAvail().X, 40f)))
+        ImGui.SameLine(ImGui.GetContentRegionAvail().X - 60f);
+        if (ImGuiUtils.ColoredIconButton(FontAwesomeIcon.Plus, ImGuiUtils.Green, size: new Vector2(60f, 60f), tooltip: "Create a new preset"))
         {
             var preset = new CameraPreset(_presetMode);
             Service.Config.PresetNames.Add(preset.Name);
@@ -56,8 +60,9 @@ public partial class PluginWindow
             Service.Config.Save();
         }
 
+        var menuSize = _selectedPreset != null ? ImGui.GetContentRegionAvail() - new Vector2(0, 225f) : ImGui.GetContentRegionAvail();
         ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0f);
-        ImGui.BeginChild("Preset Menu", ImGui.GetContentRegionAvail(), true);
+        ImGui.BeginChild("Preset Menu", menuSize, true);
         ImGui.PopStyleVar(1);
 
         ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
@@ -69,92 +74,88 @@ public partial class PluginWindow
             var preset = Service.Config.Presets[i];
             if (!preset.Name.ToLower().Contains(_searchQuery.ToLower())) { continue; }
 
-            if (_renamedIndex == i)
+            bool isCurrentSelected = _selected == i;
+            if (ImGui.Selectable($"{preset.Name}##Camera", isCurrentSelected))
             {
-                ImGui.SetNextItemOpen(true);
-                this._primaryFocus = -1;
-                this._renamedIndex = _primaryFocus;
-            }
+                this._selected = isCurrentSelected ? -1 : i;
+                this._selectedPreset = isCurrentSelected ? null : preset;
 
-            if (ImGui.TreeNode($"{preset.Name}##{i}"))
-            {
-                PrintPreset(ref preset);
-                if (ImGui.Button("Load Preset"))
-                {
-                    if (!preset.Load())
-                    {
-                        PluginLog.Information($"Attempted to load an invalid preset \"{preset.Name}\"");
-                        this._errorIndex = i;
-                        this._errorMessage = "Error: Preset contains invalid values";
-                    }
-                }
-                ImGui.SameLine();
-                // Show / Hide the rename input box
-                if (ImGui.Button("Rename"))
-                {
-                    if (this._primaryFocus != i)
-                    {
-                        this._renameOpen = true;
-                        this._primaryFocus = i;
-                    }
-                    else
-                    {
-                        this._renameOpen = false;
-                        this._primaryFocus = -1;
-                    }
-                }
-                ImGui.SameLine();
-                if (ImGui.Button("Delete Preset"))
-                {
-                    RemovePreset(ref preset);
-
-                    this._renameOpen = false;
-                    this._primaryFocus = -1;
-                }
-
-                if (_renameOpen && _primaryFocus == i)
-                {
-                    string newName = preset.Name;
-                    if (ImGui.InputText("##Rename(Input)", ref newName, 30, ImGuiInputTextFlags.EnterReturnsTrue))
-                    {
-                        var oldName = preset.Rename(newName);
-                        if (oldName != null)
-                        {
-                            Service.Config.PresetNames.Remove(oldName);
-                            Service.Config.PresetNames.Add(newName);
-                            Service.Config.Save();
-
-                            this._renameOpen = false;
-                            this._renamedIndex = _primaryFocus;
-                            this._errorIndex = -1;
-                        }
-                        else
-                        {
-                            this._errorIndex = i;
-                            this._errorMessage = "Names must be unique.";
-                        }
-                    }
-                }
-
-                if (_errorIndex == i)
-                {
-                    ImGui.TextColored(new Vector4(1, 0, 0, 1), _errorMessage);
-                }
-                ImGui.TreePop();
+                this._renameOpen = false;
+                this._errorMessage = "";
             }
         }
         ImGui.EndChild();
+
+        if (_selectedPreset != null)
+        {
+            ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0f);
+            ImGui.BeginChild("Preset Detail", ImGui.GetContentRegionAvail(), true);
+            ImGui.PopStyleVar(1);
+
+            DrawPresetInfo(ref _selectedPreset);
+            if (ImGuiUtils.ColoredButton("Load Preset", ImGuiUtils.Blue))
+            {
+                if (!_selectedPreset.Load())
+                {
+                    PluginLog.Information($"Attempted to load camera preset \"{_selectedPreset.Name}\" which contains invalid values");
+                    this._errorMessage = "Error: Preset is invalid";
+                }
+            }
+            ImGui.SameLine();
+            if (ImGuiUtils.ColoredButton("Rename", ImGuiUtils.Orange))
+            {
+                this._renameOpen = !_renameOpen;
+                this._errorMessage = "";
+            }
+            ImGui.SameLine();
+            if (ImGuiUtils.ColoredButton("Remove", ImGuiUtils.Red))
+            {
+                RemovePreset(ref _selectedPreset);
+                this._selected = -1;
+            }
+
+            if (_renameOpen)
+            {
+                string newName = _selectedPreset.Name;
+                ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
+                if (ImGui.InputText("##RenameCamera", ref newName, 30, ImGuiInputTextFlags.EnterReturnsTrue))
+                {
+                    var oldName = _selectedPreset.Rename(newName);
+                    this._renameOpen = false;
+
+                    if (oldName != null)
+                    {
+                        Service.Config.PresetNames.Remove(oldName);
+                        Service.Config.PresetNames.Add(newName);
+                        Service.Config.Save();
+                    }
+                    else
+                    {
+                        this._errorMessage = "Names must be unique";
+                    }
+                }
+                ImGui.PopItemWidth();
+            }
+
+            if (_errorMessage != "")
+            {
+                ImGui.TextColored(new Vector4(1, 0, 0, 1), _errorMessage);
+            }
+            ImGui.EndChild();
+        }
         ImGui.EndTabItem();
     }
 
-    private void PrintPreset(ref CameraPreset preset)
+    private void DrawPresetInfo(ref CameraPreset preset)
     {
         string foVFormatted = preset.GposeFoV > 0 ? $"({preset.ZoomFoV:F2}+{preset.GposeFoV})" : $"({preset.ZoomFoV:F2}{preset.GposeFoV})";
+
+        ImGui.TextWrapped(preset.Name);
 
         ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.6f, 0.6f, 0.6f, 1f));
 
         ImGui.TextWrapped($"Mode: {(PresetMode)preset.PositionMode} Position");
-        ImGui.Text($"Zoom: {preset.Distance} , FoV: {(preset.ZoomFoV + preset.GposeFoV):F2} " + foVFormatted);
+        ImGui.Text($"Zoom: {preset.Distance:F2} , FoV: {(preset.ZoomFoV + preset.GposeFoV):F2} " + foVFormatted);
         ImGui.Text($"H: {MathUtils.RadToDeg(preset.HRotation):F2}\x00B0 , V: {MathUtils.RadToDeg(preset.VRotation):F2}\x00B0");
 
         ImGui.Text($"Pan: {MathUtils.RadToDeg(preset.Pan):F0}\x00B0 , "); ImGui.SameLine();

@@ -32,17 +32,17 @@ public unsafe class CameraPreset
     {
         var cameraManager = (CameraManager*)Service.SigScanner.GetStaticAddressFromSig("4C 8D 35 ?? ?? ?? ?? 85 D2");
         _camera = cameraManager->WorldCamera;
-        PluginLog.Debug($"Pointer to game camera @ {((IntPtr)_camera).ToString("X")}");
+        PluginLog.Debug($"Pointer to game camera @ 0x{((IntPtr)_camera).ToString("X16")}");
     }
 
     public CameraPreset() { }
     public CameraPreset(int mode = 0)
     {
-        string presetName = "";
+        this.Name = "";
         for (int i = 1; i <= Service.Config.Presets.Count + 1; i++)
         {
-            presetName = $"Preset #{i}";
-            if (!Service.Config.PresetNames.Contains(presetName))
+            this.Name = $"Preset #{i}";
+            if (!Service.Config.PresetNames.Contains(Name))
             {
                 break;
             }
@@ -119,7 +119,7 @@ public unsafe class CameraPreset
     {
         if (Service.Config.PresetNames.Contains(name))
         {
-            PluginLog.Information($"Couldn't rename preset \"{Name}\" to \"{name}\" - Name is taken");
+            PluginLog.Information($"Couldn't rename camera preset \"{Name}\" to \"{name}\" - Name is taken");
             return null;
         }
         string oldName = Name;
