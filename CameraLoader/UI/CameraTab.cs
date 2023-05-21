@@ -3,6 +3,7 @@ using Dalamud.Logging;
 using Dalamud.Interface;
 
 using CameraLoader.Utils;
+using CameraLoader.Game;
 
 using ImGuiNET;
 

@@ -3,12 +3,19 @@ using System.Collections.Generic;
 using Dalamud.Configuration;
 using Dalamud.Plugin;
 
-namespace CameraLoader;
+using CameraLoader.Game;
+
+namespace CameraLoader.Config;
 
 [Serializable]
 public class Configuration : IPluginConfiguration
 {
     public int Version { get; set; } = 0;
+
+    public bool LockWindowPosition = false;
+    public bool LockWindowSize = false;
+    public WindowOpenMode WindowOpenMode = 0;
+
     public List<CameraPreset> Presets = new();
 
     [NonSerialized]

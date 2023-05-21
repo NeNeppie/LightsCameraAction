@@ -3,7 +3,7 @@ using Dalamud.Logging;
 
 using CameraLoader.Utils;
 
-namespace CameraLoader;
+namespace CameraLoader.Game;
 
 public enum PresetMode
 {

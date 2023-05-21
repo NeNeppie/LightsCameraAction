@@ -21,17 +21,13 @@ public class CameraLoader : IDalamudPlugin
     {
         this._pluginInterface = pluginInterface;
         this._pluginInterface.Create<Service>();
+        bool windowState = Service.Initialize(_pluginInterface);
 
-        // Load commands
         this._commandManager = new PluginCommandManager<CameraLoader>(this, commands);
 
-        // Get or create a configuration object
-        Service.Config = (Configuration)this._pluginInterface.GetPluginConfig() ?? new Configuration();
-        Service.Config.Initialize(this._pluginInterface);
-
-        // Initialize the UI
         _windowSystem = new WindowSystem(this.Name);
         _window = this._pluginInterface.Create<PluginWindow>();
+        _window.IsOpen = windowState;
         _windowSystem.AddWindow(_window);
 
         this._pluginInterface.UiBuilder.DisableGposeUiHide = true;
@@ -52,15 +48,14 @@ public class CameraLoader : IDalamudPlugin
         if (!disposing) return;
 
         this._commandManager.Dispose();
-
         this._pluginInterface.SavePluginConfig(Service.Config);
-
         this._pluginInterface.UiBuilder.Draw -= this._window.Draw;
     }
 
     public void Dispose()
     {
         Dispose(true);
+        Service.Dispose();
         GC.SuppressFinalize(this);
     }
     #endregion
