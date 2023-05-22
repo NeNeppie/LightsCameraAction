@@ -12,7 +12,12 @@ public partial class PluginWindow : Window
     public PluginWindow() : base("CameraLoader")
     {
         IsOpen = false;
-        Size = new Vector2(250, 420);
+        Size = new Vector2(250f, 355f);
+        SizeConstraints = new WindowSizeConstraints
+        {
+            MaximumSize = new Vector2(1500f, -1),
+            MinimumSize = new Vector2(240f, -1)
+        };
         SizeCondition = ImGuiCond.FirstUseEver;
 
         Service.GPoseHooking.OnEnterGposeEvent += WindowBehaviourCheck;
@@ -28,8 +33,15 @@ public partial class PluginWindow : Window
         {
             DrawCameraTab();
             DrawOptionsTab();
+#if DEBUG
+            ImGui.BeginTabItem(ImGui.GetWindowSize().ToString());
+            ImGui.EndTabItem();
+#endif
             ImGui.EndTabBar();
         }
+
+        var size = ImGui.GetWindowSize();
+        ImGui.SetWindowSize(size with { Y = ImGui.GetCursorPosY() + 5f });
     }
 
     private ImGuiWindowFlags GetWindowFlags()

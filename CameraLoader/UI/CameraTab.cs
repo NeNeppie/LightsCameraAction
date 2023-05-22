@@ -30,9 +30,12 @@ public partial class PluginWindow
         bool gposeActorExists = Service.ObjectTable[201] != null;
         if (!(isInCameraMode && gposeActorExists))
         {
+            this._selectedPreset = null;
+            this._selected = -1;
+
             ImGui.TextWrapped("Unavailable outside of Group Pose");
-            ImGui.EndTabItem();
-            return;
+            ImGui.Separator();
+            ImGui.BeginDisabled();
         }
 
         ImGuiUtils.IconText(FontAwesomeIcon.CameraRetro); ImGui.SameLine();
@@ -61,9 +64,9 @@ public partial class PluginWindow
             Service.Config.Save();
         }
 
-        var menuSize = _selectedPreset != null ? ImGui.GetContentRegionAvail() - new Vector2(0, 225f) : ImGui.GetContentRegionAvail();
         ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0f);
-        ImGui.BeginChild("Preset Menu", menuSize, true);
+        // TODO: Adjustable height based on rows
+        ImGui.BeginChild("Preset Menu", new Vector2(0.0f, 300f), true);
         ImGui.PopStyleVar(1);
 
         ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
@@ -90,7 +93,7 @@ public partial class PluginWindow
         if (_selectedPreset != null)
         {
             ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0f);
-            ImGui.BeginChild("Preset Detail", ImGui.GetContentRegionAvail(), true);
+            ImGui.BeginChild("Preset Detail", new Vector2(0.0f, 225f), true);
             ImGui.PopStyleVar(1);
 
             DrawPresetInfo(ref _selectedPreset);
@@ -145,6 +148,12 @@ public partial class PluginWindow
             }
             ImGui.EndChild();
         }
+
+        if (!(isInCameraMode && gposeActorExists))
+        {
+            ImGui.EndDisabled();
+        }
+
         ImGui.EndTabItem();
     }
 
