@@ -9,9 +9,9 @@ namespace CameraLoader.UI;
 
 public partial class PluginWindow
 {
-    public void DrawOptionsTab()
+    public void DrawSettingsTab()
     {
-        bool res = ImGui.BeginTabItem("Options##OptionsTab");
+        bool res = ImGui.BeginTabItem("Settings##SettingsTab");
         if (!res) { return; }
 
         // Drawing here

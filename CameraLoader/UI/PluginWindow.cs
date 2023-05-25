@@ -32,8 +32,9 @@ public partial class PluginWindow : Window
         if (ImGui.BeginTabBar("##TabBar", ImGuiTabBarFlags.None))
         {
             DrawCameraTab();
-            DrawOptionsTab();
+            DrawSettingsTab();
 #if DEBUG
+            // Debug tab displaying window size
             ImGui.BeginTabItem(ImGui.GetWindowSize().ToString());
             ImGui.EndTabItem();
 #endif
