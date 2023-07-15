@@ -59,8 +59,8 @@ public partial class PluginWindow
         if (ImGuiUtils.ColoredIconButton(FontAwesomeIcon.Plus, ImGuiUtils.Green, size: new Vector2(60f, 60f), tooltip: "Create a new preset"))
         {
             var preset = new CameraPreset(_presetMode);
-            Service.Config.PresetNames.Add(preset.Name);
-            Service.Config.Presets.Add(preset);
+            Service.Config.CameraPresetNames.Add(preset.Name);
+            Service.Config.CameraPresets.Add(preset);
             Service.Config.Save();
         }
 
@@ -73,9 +73,9 @@ public partial class PluginWindow
         ImGui.InputTextWithHint("##Search", "Search...", ref _searchQuery, 30);
         ImGui.PopItemWidth();
 
-        for (int i = 0; i < Service.Config.Presets.Count; i++)
+        for (int i = 0; i < Service.Config.CameraPresets.Count; i++)
         {
-            var preset = Service.Config.Presets[i];
+            var preset = Service.Config.CameraPresets[i];
             if (!preset.Name.ToLower().Contains(_searchQuery.ToLower())) { continue; }
 
             bool isCurrentSelected = _selected == i;
@@ -130,8 +130,8 @@ public partial class PluginWindow
 
                     if (oldName != null)
                     {
-                        Service.Config.PresetNames.Remove(oldName);
-                        Service.Config.PresetNames.Add(newName);
+                        Service.Config.CameraPresetNames.Remove(oldName);
+                        Service.Config.CameraPresetNames.Add(newName);
                         Service.Config.Save();
                     }
                     else
@@ -178,8 +178,8 @@ public partial class PluginWindow
 
     private void RemovePreset(ref CameraPreset preset)
     {
-        Service.Config.PresetNames.Remove(preset.Name);
-        Service.Config.Presets.Remove(preset);
+        Service.Config.CameraPresetNames.Remove(preset.Name);
+        Service.Config.CameraPresets.Remove(preset);
         Service.Config.Save();
     }
 }

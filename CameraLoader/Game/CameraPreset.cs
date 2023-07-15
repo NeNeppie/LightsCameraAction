@@ -6,6 +6,7 @@ using CameraLoader.Utils;
 
 namespace CameraLoader.Game;
 
+// TODO: Move this out
 public enum PresetMode
 {
     Character,
@@ -40,13 +41,10 @@ public unsafe class CameraPreset
     public CameraPreset(int mode = 0)
     {
         this.Name = "";
-        for (int i = 1; i <= Service.Config.Presets.Count + 1; i++)
+        for (int i = 1; i <= Service.Config.CameraPresets.Count + 1; i++)
         {
             this.Name = $"Preset #{i}";
-            if (!Service.Config.PresetNames.Contains(Name))
-            {
-                break;
-            }
+            if (!Service.Config.CameraPresetNames.Contains(Name)) { break; }
         }
 
         float cameraRot = _camera->HRotation;
@@ -118,13 +116,13 @@ public unsafe class CameraPreset
 
     public string Rename(string name)
     {
-        if (Service.Config.PresetNames.Contains(name))
+        if (Service.Config.CameraPresetNames.Contains(name))
         {
-            PluginLog.Information($"Couldn't rename camera preset \"{Name}\" to \"{name}\" - Name is taken");
+            PluginLog.Information($"Couldn't rename camera preset \"{this.Name}\" to \"{name}\" - Name is taken");
             return null;
         }
-        string oldName = Name;
-        Name = name;
+        string oldName = this.Name;
+        this.Name = name;
         return oldName;
     }
 }

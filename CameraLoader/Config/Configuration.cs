@@ -16,18 +16,24 @@ public class Configuration : IPluginConfiguration
     public bool LockWindowSize = false;
     public WindowOpenMode WindowOpenMode = 0;
 
-    public List<CameraPreset> Presets = new();
+    public List<CameraPreset> CameraPresets = new();
+    public List<LightingPreset> LightingPresets = new();
 
     [NonSerialized]
-    public HashSet<string> PresetNames = new();
+    public HashSet<string> CameraPresetNames = new();
+    public HashSet<string> LightingPresetNames = new();
     private DalamudPluginInterface _pluginInterface;
 
     public void Initialize(DalamudPluginInterface pi)
     {
         this._pluginInterface = pi;
-        foreach (var preset in Presets)
+        foreach (var preset in CameraPresets)
         {
-            PresetNames.Add(preset.Name);
+            CameraPresetNames.Add(preset.Name);
+        }
+        foreach (var preset in LightingPresets)
+        {
+            LightingPresetNames.Add(preset.Name);
         }
     }
 
