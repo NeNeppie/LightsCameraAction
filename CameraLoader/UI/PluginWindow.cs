@@ -1,4 +1,4 @@
-﻿using System.Numerics;
+using System.Numerics;
 using Dalamud.Interface.Windowing;
 
 using CameraLoader.Config;
@@ -32,6 +32,7 @@ public partial class PluginWindow : Window
         if (ImGui.BeginTabBar("##TabBar", ImGuiTabBarFlags.None))
         {
             DrawCameraTab();
+            DrawLightingTab();
             DrawSettingsTab();
 #if DEBUG
             // Debug tab displaying window size
