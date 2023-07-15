@@ -11,15 +11,7 @@ namespace CameraLoader.UI;
 
 public partial class PluginWindow
 {
-    // TODO: Consider moving some of these out to the main window portion of the class
-    private int _selected = -1;
-    private bool _renameOpen = false;
-    private string _errorMessage = "";
-    private string _searchQuery = "";
-
-    private CameraPreset _selectedPreset = null; // Not good
-
-    private static int _presetMode = (int)PresetMode.Character;
+    private CameraPreset _selectedPreset = null; // TODO: Preset Interface
 
     public void DrawCameraTab()
     {
@@ -27,34 +19,11 @@ public partial class PluginWindow
         if (!res) { return; }
 
         // Drawing here
-        bool isInCameraMode = Service.Conditions[Dalamud.Game.ClientState.Conditions.ConditionFlag.WatchingCutscene];
-        bool gposeActorExists = Service.ObjectTable[201] != null;
-        if (!(isInCameraMode && gposeActorExists))
-        {
-            this._selectedPreset = null;
-            this._selected = -1;
-
-            ImGui.TextWrapped("Unavailable outside of Group Pose");
-            ImGui.Separator();
-            ImGui.BeginDisabled();
-        }
+        bool isInGPose = IsInGPose();
+        if (!isInGPose) { ImGui.BeginDisabled(); }
 
         ImGuiUtils.IconText(FontAwesomeIcon.CameraRetro); ImGui.SameLine();
-        ImGui.Text("Preset Mode:");
-        ImGui.BeginGroup();
-        {
-            ImGui.RadioButton("Character Position", ref _presetMode, (int)PresetMode.Character);
-            if (ImGui.IsItemHovered())
-            {
-                ImGui.SetTooltip("Presets are saved and loaded relative to your character's orientation");
-            }
-            ImGui.RadioButton("Camera Position", ref _presetMode, (int)PresetMode.Camera);
-            if (ImGui.IsItemHovered())
-            {
-                ImGui.SetTooltip("Presets are saved relative to the camera's current orientation.\nYour character's orientation is not taken into account");
-            }
-        }
-        ImGui.EndGroup();
+        DrawPresetModeSelection();
 
         ImGui.SameLine(ImGui.GetContentRegionAvail().X - 60f);
         if (ImGuiUtils.ColoredIconButton(FontAwesomeIcon.Plus, ImGuiUtils.Green, size: new Vector2(60f, 60f), tooltip: "Create a new preset"))
@@ -94,7 +63,7 @@ public partial class PluginWindow
         if (_selectedPreset != null)
         {
             ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0f);
-            ImGui.BeginChild("Preset Detail", new Vector2(0.0f, 225f), true);
+            ImGui.BeginChild("Preset Detail", new Vector2(0.0f, 230f), true);
             ImGui.PopStyleVar(1);
 
             DrawPresetInfo(ref _selectedPreset);
@@ -143,18 +112,11 @@ public partial class PluginWindow
                 ImGui.PopItemWidth();
             }
 
-            if (_errorMessage != "")
-            {
-                ImGui.TextColored(new Vector4(1, 0, 0, 1), _errorMessage);
-            }
+            DrawErrorMessage();
             ImGui.EndChild();
         }
 
-        if (!(isInCameraMode && gposeActorExists))
-        {
-            ImGui.EndDisabled();
-        }
-
+        if (!isInGPose) { ImGui.EndDisabled(); }
         ImGui.EndTabItem();
     }
 
