@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace CameraLoader.Game;
+namespace CameraLoader.Game.Structs;
 
 // Based off of https://github.com/Tenrys/ZoomTilt/tree/master/ZoomTilt/Structures , 
 // which is in turn based off of... a zoom hack. Yeah.
