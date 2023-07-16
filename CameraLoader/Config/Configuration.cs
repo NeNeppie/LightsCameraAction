@@ -21,6 +21,7 @@ public class Configuration : IPluginConfiguration
 
     [NonSerialized]
     public HashSet<string> CameraPresetNames = new();
+    [NonSerialized]
     public HashSet<string> LightingPresetNames = new();
     private DalamudPluginInterface _pluginInterface;
 
