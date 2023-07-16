@@ -8,7 +8,6 @@ namespace CameraLoader.UI;
 
 public partial class PluginWindow
 {
-    private int _selected = -1;
     private bool _renameOpen = false;
     private string _errorMessage = "";
     private string _searchQuery = "";
@@ -18,17 +17,7 @@ public partial class PluginWindow
     {
         bool isInCameraMode = Service.Conditions[Dalamud.Game.ClientState.Conditions.ConditionFlag.WatchingCutscene];
         bool gposeActorExists = Service.ObjectTable[201] != null;
-        if (!(isInCameraMode && gposeActorExists))
-        {
-            this._selectedPreset = null;
-            this._selectedPresetL = null;
-            this._selected = -1;
-
-            ImGui.TextWrapped("Unavailable outside of Group Pose");
-            ImGui.Separator();
-            return false;
-        }
-        return true;
+        return (isInCameraMode && gposeActorExists);
     }
 
     private void DrawPresetModeSelection()

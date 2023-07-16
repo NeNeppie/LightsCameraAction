@@ -11,7 +11,8 @@ namespace CameraLoader.UI;
 
 public partial class PluginWindow
 {
-    private CameraPreset _selectedPreset = null; // TODO: Preset Interface
+    private int _cameraIndex = -1;
+    private CameraPreset _cameraPreset = null;
 
     public void DrawCameraTab()
     {
@@ -19,11 +20,19 @@ public partial class PluginWindow
         if (!res) { return; }
 
         // Drawing here
-        bool isInGPose = IsInGPose();
-        if (!isInGPose) { ImGui.BeginDisabled(); }
+        bool isInGPose = this.IsInGPose();
+        if (!isInGPose)
+        {
+            _cameraIndex = -1;
+            _cameraPreset = null;
+
+            ImGui.TextWrapped("Unavailable outside of Group Pose");
+            ImGui.Separator();
+            ImGui.BeginDisabled();
+        }
 
         ImGuiUtils.IconText(FontAwesomeIcon.CameraRetro); ImGui.SameLine();
-        DrawPresetModeSelection();
+        this.DrawPresetModeSelection();
 
         ImGui.SameLine(ImGui.GetContentRegionAvail().X - 60f);
         if (ImGuiUtils.ColoredIconButton(FontAwesomeIcon.Plus, ImGuiUtils.Green, size: new Vector2(60f, 60f), tooltip: "Create a new preset"))
@@ -48,11 +57,11 @@ public partial class PluginWindow
             var preset = Service.Config.CameraPresets[i];
             if (!preset.Name.ToLower().Contains(_searchQuery.ToLower())) { continue; }
 
-            bool isCurrentSelected = _selected == i;
+            bool isCurrentSelected = _cameraIndex == i;
             if (ImGui.Selectable($"{preset.Name}##Camera", isCurrentSelected))
             {
-                this._selected = isCurrentSelected ? -1 : i;
-                this._selectedPreset = isCurrentSelected ? null : preset;
+                this._cameraIndex = isCurrentSelected ? -1 : i;
+                this._cameraPreset = isCurrentSelected ? null : preset;
 
                 this._renameOpen = false;
                 this._errorMessage = "";
@@ -60,18 +69,18 @@ public partial class PluginWindow
         }
         ImGui.EndChild();
 
-        if (_selectedPreset != null)
+        if (_cameraPreset != null)
         {
             ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0f);
             ImGui.BeginChild("Preset Detail", new Vector2(0.0f, 230f), true);
             ImGui.PopStyleVar(1);
 
-            DrawPresetInfo(ref _selectedPreset);
+            DrawPresetInfo(ref _cameraPreset);
             if (ImGuiUtils.ColoredButton("Load Preset", ImGuiUtils.Blue))
             {
-                if (!_selectedPreset.Load())
+                if (!_cameraPreset.Load())
                 {
-                    PluginLog.Information($"Attempted to load camera preset \"{_selectedPreset.Name}\" which contains invalid values");
+                    PluginLog.Information($"Attempted to load invalid Camera Preset \"{_cameraPreset.Name}\"");
                     this._errorMessage = "Preset is invalid";
                 }
             }
@@ -84,18 +93,18 @@ public partial class PluginWindow
             ImGui.SameLine();
             if (ImGuiUtils.ColoredButton("Remove", ImGuiUtils.Red))
             {
-                RemovePreset(ref _selectedPreset);
-                this._selected = -1;
-                this._selectedPreset = null;
+                RemovePreset(ref _cameraPreset);
+                this._cameraIndex = -1;
+                this._cameraPreset = null;
             }
 
             if (_renameOpen)
             {
-                string newName = _selectedPreset.Name;
+                string newName = _cameraPreset.Name;
                 ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
                 if (ImGui.InputText("##RenameCamera", ref newName, 30, ImGuiInputTextFlags.EnterReturnsTrue))
                 {
-                    var oldName = _selectedPreset.Rename(newName);
+                    var oldName = _cameraPreset.Rename(newName);
                     this._renameOpen = false;
 
                     if (oldName != null)
@@ -112,7 +121,7 @@ public partial class PluginWindow
                 ImGui.PopItemWidth();
             }
 
-            DrawErrorMessage();
+            this.DrawErrorMessage();
             ImGui.EndChild();
         }
 

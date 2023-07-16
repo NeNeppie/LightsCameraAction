@@ -6,7 +6,7 @@ using CameraLoader.Game.Structs;
 
 namespace CameraLoader.Game;
 
-public class LightingInfo
+public class LightInfo
 {
     public bool Active { get; set; }
     public Vector3 relativePos { get; set; }
@@ -14,11 +14,9 @@ public class LightingInfo
     public byte Type { get; set; }
 }
 
-public unsafe class LightingPreset
+public unsafe class LightingPreset : PresetBase
 {
-    public string Name { get; set; } = "";
-    public int PositionMode { get; set; }
-    public LightingInfo[] Lights = new LightingInfo[3];
+    public LightInfo[] Lights = new LightInfo[3];
 
     public LightingPreset() { }
     public LightingPreset(int mode = 0)
@@ -50,7 +48,7 @@ public unsafe class LightingPreset
 
     // TODO: Implement construction/destruction of lights. 
     //       Reflect changes in the UI.
-    public void Load()
+    public override bool Load()
     {
         var eventFramework = FFXIVClientStructs.FFXIV.Client.Game.Event.EventFramework.Instance();
         var eventGPoseController = &eventFramework->EventSceneModule.EventGPoseController;
@@ -66,9 +64,10 @@ public unsafe class LightingPreset
             lightDrawObject->LightObject->RGB = Lights[i].RGB;
             lightDrawObject->LightObject->Type = Lights[i].Type;
         }
+        return true;
     }
 
-    public string Rename(string name)
+    public override string Rename(string name)
     {
         if (Service.Config.LightingPresetNames.Contains(name))
         {

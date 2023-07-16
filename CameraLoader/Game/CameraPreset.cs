@@ -1,23 +1,11 @@
-using System;
 using Dalamud.Logging;
 
-using CameraLoader.Game.Structs;
 using CameraLoader.Utils;
 
 namespace CameraLoader.Game;
 
-// TODO: Move this out
-public enum PresetMode
+public unsafe class CameraPreset : PresetBase
 {
-    Character,
-    Camera
-}
-
-public unsafe class CameraPreset
-{
-    public string Name { get; set; } = "";
-    public int PositionMode { get; set; }
-
     public float Distance { get; set; }
     public float HRotation { get; set; }
     public float VRotation { get; set; }
@@ -26,16 +14,6 @@ public unsafe class CameraPreset
     public float Pan { get; set; }
     public float Tilt { get; set; }
     public float Roll { get; set; }
-
-    [NonSerialized]
-    private static GameCamera* _camera;
-
-    static CameraPreset()
-    {
-        var cameraManager = (CameraManager*)Service.SigScanner.GetStaticAddressFromSig("4C 8D 35 ?? ?? ?? ?? 85 D2");
-        _camera = cameraManager->WorldCamera;
-        PluginLog.Debug($"Pointer to game camera @ 0x{((IntPtr)_camera).ToString("X16")}");
-    }
 
     public CameraPreset() { }
     public CameraPreset(int mode = 0)
@@ -88,7 +66,7 @@ public unsafe class CameraPreset
         return true;
     }
 
-    public bool Load()
+    public override bool Load()
     {
         if (!IsValid()) { return false; }
 
@@ -114,7 +92,7 @@ public unsafe class CameraPreset
         return true;
     }
 
-    public string Rename(string name)
+    public override string Rename(string name)
     {
         if (Service.Config.CameraPresetNames.Contains(name))
         {
