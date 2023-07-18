@@ -3,12 +3,14 @@ using System.Runtime.InteropServices;
 using Dalamud.Logging;
 
 using CameraLoader.Game.Structs;
+using CameraLoader.Utils;
 
 namespace CameraLoader.Game;
 
 public class LightInfo
 {
     public bool Active { get; set; }
+    public float relativeRot { get; set; }
     public Vector3 relativePos { get; set; }
     public Vector3 RGB { get; set; }
     public byte Type { get; set; }
@@ -37,13 +39,21 @@ public unsafe class LightingPreset : PresetBase
             DrawObject* lightDrawObject = (DrawObject*)Marshal.ReadIntPtr((nint)eventGPoseController + 0xE0 + (8 * i));
             if (lightDrawObject == null) { continue; }
 
+            var relativePos = lightDrawObject->Position - (Service.ClientState.LocalPlayer?.Position ?? new Vector3(0, 0, 0));
+            if (mode == (int)PresetMode.Character)
+            {
+                var playerRot = Service.ClientState.LocalPlayer?.Rotation ?? 0f;
+                var theta = MathUtils.ConvertToRelative(MathUtils.GetHorizontalRotation(relativePos), playerRot);
+                this.Lights[i].relativeRot = theta; // For display only
+                (relativePos.X, relativePos.Z) = MathUtils.RotatePoint2D((relativePos.X, relativePos.Z), playerRot);
+            }
+
             this.Lights[i].Active = true;
-            // TODO: Rotation.
-            this.Lights[i].relativePos = lightDrawObject->Position - (Service.ClientState.LocalPlayer?.Position ?? new Vector3(0, 0, 0));
+            this.Lights[i].relativePos = relativePos;
             this.Lights[i].RGB = lightDrawObject->LightObject->RGB;
             this.Lights[i].Type = lightDrawObject->LightObject->Type;
         }
-        this.PositionMode = mode; // TODO: Implement Camera mode
+        this.PositionMode = mode;
     }
 
     // TODO: Implement construction/destruction of lights. 
@@ -59,9 +69,16 @@ public unsafe class LightingPreset : PresetBase
             DrawObject* lightDrawObject = (DrawObject*)Marshal.ReadIntPtr((nint)eventGPoseController + 0xE0 + (8 * i));
             if (lightDrawObject == null) { continue; }
 
-            // TODO: Rotation.
-            lightDrawObject->Position = Lights[i].relativePos + (Service.ClientState.LocalPlayer?.Position ?? new Vector3(0, 0, 0));
+            var relativePos = Lights[i].relativePos;
+            if (PositionMode == (int)PresetMode.Character)
+            {
+                var playerRot = Service.ClientState.LocalPlayer?.Rotation ?? 0f;
+                (relativePos.X, relativePos.Z) = MathUtils.RotatePoint2D((relativePos.X, relativePos.Z), playerRot);
+            }
+
+            lightDrawObject->Position = relativePos + (Service.ClientState.LocalPlayer?.Position ?? new Vector3(0, 0, 0));
             lightDrawObject->LightObject->RGB = Lights[i].RGB;
+            // FIXME: Cutoff distance needs to be adjusted as well.
             lightDrawObject->LightObject->Type = Lights[i].Type;
         }
         return true;

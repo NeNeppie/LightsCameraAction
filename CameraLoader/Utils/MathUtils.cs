@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 
 namespace CameraLoader.Utils;
 
@@ -14,17 +15,22 @@ public static class MathUtils
         return (float)(degrees * (Math.PI / 180));
     }
 
-    public static float CameraToRelative(float camRot, float playerRot)
+    public static float GetHorizontalRotation(Vector3 position)
     {
-        camRot -= playerRot;
-
-        while (camRot > Math.PI) { camRot -= (float)Math.Tau; }
-        while (camRot < -Math.PI) { camRot += (float)Math.Tau; }
-
-        return camRot;
+        return (float)Math.Atan2(position.Z, -position.X);
     }
 
-    public static float RelativeToCamera(float relRot, float playerRot)
+    public static float ConvertToRelative(float objRot, float playerRot)
+    {
+        objRot -= playerRot;
+
+        while (objRot > Math.PI) { objRot -= (float)Math.Tau; }
+        while (objRot < -Math.PI) { objRot += (float)Math.Tau; }
+
+        return objRot;
+    }
+
+    public static float ConvertFromRelative(float relRot, float playerRot)
     {
         relRot += playerRot;
 
@@ -32,6 +38,18 @@ public static class MathUtils
         while (relRot < -Math.PI) { relRot += (float)Math.Tau; }
 
         return relRot;
+    }
+
+    public static (float, float) RotatePoint2D((float, float) position, float radians)
+    {
+        var posX = position.Item1;
+        var posY = position.Item2;
+        float sin = (float)Math.Sin(radians);
+        float cos = (float)Math.Cos(radians);
+        // X and Y are swapped because of the way this game handles coordinates
+        position.Item2 = (posX * cos) - (posY * sin);
+        position.Item1 = (posX * sin) + (posY * cos);
+        return position;
     }
 
     public static float AddPiRad(float angle)

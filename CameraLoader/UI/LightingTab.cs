@@ -124,6 +124,7 @@ public partial class PluginWindow
         ImGui.EndTabItem();
     }
 
+    // TODO: Make it fancy~    Also "fix" Type.
     private void DrawPresetInfo(ref LightingPreset preset)
     {
         ImGui.TextWrapped(preset.Name);
@@ -135,6 +136,11 @@ public partial class PluginWindow
         {
             ImGui.Separator();
             ImGui.Text($"Position: {light.relativePos.ToString("F2")}");
+            if (preset.PositionMode == (int)PresetMode.Character)
+            {
+                ImGui.SameLine();
+                ImGui.Text($"({MathUtils.RadToDeg(light.relativeRot):F2}\x00B0)");
+            }
             ImGui.Text($"Type: {light.Type}");
             ImGui.Text($"Red: {light.RGB.X:F2}, Green: {light.RGB.Y:F2}, Blue: {light.RGB.Z:F2}");
         }
