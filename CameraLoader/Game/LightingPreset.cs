@@ -78,8 +78,8 @@ public unsafe class LightingPreset : PresetBase
 
             lightDrawObject->Position = relativePos + (Service.ClientState.LocalPlayer?.Position ?? new Vector3(0, 0, 0));
             lightDrawObject->LightObject->RGB = Lights[i].RGB;
-            // FIXME: Cutoff distance needs to be adjusted as well.
             lightDrawObject->LightObject->Type = Lights[i].Type;
+            Service.GameFunctions.UpdateFalloffDistance(lightDrawObject->LightObject);
         }
         return true;
     }
