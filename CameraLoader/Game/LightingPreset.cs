@@ -56,17 +56,21 @@ public unsafe class LightingPreset : PresetBase
         this.PositionMode = mode;
     }
 
-    // TODO: Implement construction/destruction of lights. 
-    //       Reflect changes in the UI.
+    // TODO: Reflect changes in the UI.
     public override bool Load()
     {
         var eventFramework = FFXIVClientStructs.FFXIV.Client.Game.Event.EventFramework.Instance();
         var eventGPoseController = &eventFramework->EventSceneModule.EventGPoseController;
         for (int i = 0; i < 3; i++)
         {
-            if (!Lights[i].Active) { continue; }
-
             DrawObject* lightDrawObject = (DrawObject*)Marshal.ReadIntPtr((nint)eventGPoseController + 0xE0 + (8 * i));
+            if (Lights[i].Active && lightDrawObject == null ||
+                !Lights[i].Active && lightDrawObject != null)
+            {
+                Service.GameFunctions.AddRemoveGPoseLight(eventGPoseController, (uint)i);
+                lightDrawObject = (DrawObject*)Marshal.ReadIntPtr((nint)eventGPoseController + 0xE0 + (8 * i));
+            }
+
             if (lightDrawObject == null) { continue; }
 
             var relativePos = Lights[i].relativePos;
