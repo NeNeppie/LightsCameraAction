@@ -96,8 +96,14 @@ public static class ImGuiUtils
         var text = icon.ToIconString();
 
         ImGui.PushFont(UiBuilder.IconFont);
-        if (color != null) { ImGui.TextColored(color.Value, text); }
-        ImGui.Text(text);
+        if (color != null)
+        {
+            ImGui.TextColored(color.Value, text);
+        }
+        else
+        {
+            ImGui.Text(text);
+        }
         ImGui.PopFont();
     }
 }
