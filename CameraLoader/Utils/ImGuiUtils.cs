@@ -91,11 +91,12 @@ public static class ImGuiUtils
         return res;
     }
 
-    public static void IconText(FontAwesomeIcon icon)
+    public static void IconText(FontAwesomeIcon icon, Vector4? color = null)
     {
         var text = icon.ToIconString();
 
         ImGui.PushFont(UiBuilder.IconFont);
+        if (color != null) { ImGui.TextColored(color.Value, text); }
         ImGui.Text(text);
         ImGui.PopFont();
     }

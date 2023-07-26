@@ -124,7 +124,6 @@ public partial class PluginWindow
         ImGui.EndTabItem();
     }
 
-    // TODO: Make it fancy~    Also "fix" Type.
     private void DrawPresetInfo(ref LightingPreset preset)
     {
         ImGui.TextWrapped(preset.Name);
@@ -141,8 +140,13 @@ public partial class PluginWindow
                 ImGui.SameLine();
                 ImGui.Text($"({MathUtils.RadToDeg(light.relativeRot):F2}\x00B0)");
             }
-            ImGui.Text($"Type: {light.Type}");
-            ImGui.Text($"Red: {light.RGB.X:F2}, Green: {light.RGB.Y:F2}, Blue: {light.RGB.Z:F2}");
+            ImGui.Text($"Type: {3 - light.Type}");
+            ImGuiUtils.IconText(FontAwesomeIcon.Circle, new(1f, 0f, 0f, 1f)); ImGui.SameLine();
+            ImGui.TextColored(new(1f, 0f, 0f, 1f), $"Red: {light.RGB.X:F2}, "); ImGui.SameLine();
+            ImGuiUtils.IconText(FontAwesomeIcon.Circle, new(0f, 1f, 0f, 1f)); ImGui.SameLine();
+            ImGui.TextColored(new(0f, 1f, 0f, 1f), $"Green: {light.RGB.Y:F2}, "); ImGui.SameLine();
+            ImGuiUtils.IconText(FontAwesomeIcon.Circle, new(0f, 0f, 1f, 1f)); ImGui.SameLine();
+            ImGui.TextColored(new(0f, 0f, 1f, 1f), $"Blue: {light.RGB.Z:F2}");
         }
         ImGui.PopStyleColor(1);
     }
