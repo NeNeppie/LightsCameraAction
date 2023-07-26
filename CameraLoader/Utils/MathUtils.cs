@@ -65,4 +65,15 @@ public static class MathUtils
         while (angle < Math.PI) { angle += (float)Math.Tau; }
         return angle;
     }
+
+    // Converting from values stored in DrawObjects to the ones displayed to the user
+    public static Vector3 ConvertFloatsTo24BitColor(Vector3 color)
+    {
+        color = Vector3.SquareRoot(color) * 64f;
+        for (int i = 0; i < 3; i++)
+        {
+            if (color[i] >= 128) { color[i]--; }
+        }
+        return color;
+    }
 }

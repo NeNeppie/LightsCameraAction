@@ -1,5 +1,6 @@
 using System.Numerics;
 using Dalamud.Interface;
+using Dalamud.Interface.Colors;
 
 using CameraLoader.Game;
 using CameraLoader.Utils;
@@ -129,24 +130,32 @@ public partial class PluginWindow
         ImGui.TextWrapped(preset.Name);
 
         ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.6f, 0.6f, 0.6f, 1f));
-
         ImGui.TextWrapped($"Mode: {(PresetMode)preset.PositionMode} Position");
+
+        int i = 1;
         foreach (var light in preset.Lights)
         {
             ImGui.Separator();
+            if (!light.Active) { ImGui.BeginDisabled(); }
+
+            ImGui.Text($"Light {i++} | Type: {3 - light.Type}");
             ImGui.Text($"Position: {light.relativePos.ToString("F2")}");
+
             if (preset.PositionMode == (int)PresetMode.Character)
             {
                 ImGui.SameLine();
                 ImGui.Text($"({MathUtils.RadToDeg(light.relativeRot):F2}\x00B0)");
             }
-            ImGui.Text($"Type: {3 - light.Type}");
-            ImGuiUtils.IconText(FontAwesomeIcon.Circle, new(1f, 0f, 0f, 1f)); ImGui.SameLine();
-            ImGui.TextColored(new(1f, 0f, 0f, 1f), $"Red: {light.RGB.X:F2}, "); ImGui.SameLine();
-            ImGuiUtils.IconText(FontAwesomeIcon.Circle, new(0f, 1f, 0f, 1f)); ImGui.SameLine();
-            ImGui.TextColored(new(0f, 1f, 0f, 1f), $"Green: {light.RGB.Y:F2}, "); ImGui.SameLine();
-            ImGuiUtils.IconText(FontAwesomeIcon.Circle, new(0f, 0f, 1f, 1f)); ImGui.SameLine();
-            ImGui.TextColored(new(0f, 0f, 1f, 1f), $"Blue: {light.RGB.Z:F2}");
+
+            var color = light.RGB != Vector3.Zero ? MathUtils.ConvertFloatsTo24BitColor(light.RGB) : Vector3.Zero;
+            ImGuiUtils.IconText(FontAwesomeIcon.Circle, ImGuiColors.DPSRed); ImGui.SameLine();
+            ImGui.TextColored(ImGuiColors.DPSRed, $"R: {color.X:F0}, "); ImGui.SameLine();
+            ImGuiUtils.IconText(FontAwesomeIcon.Circle, ImGuiColors.HealerGreen); ImGui.SameLine();
+            ImGui.TextColored(ImGuiColors.HealerGreen, $"G: {color.Y:F0}, "); ImGui.SameLine();
+            ImGuiUtils.IconText(FontAwesomeIcon.Circle, ImGuiColors.TankBlue); ImGui.SameLine();
+            ImGui.TextColored(ImGuiColors.TankBlue, $"B: {color.Z:F0}");
+
+            ImGui.EndDisabled();
         }
         ImGui.PopStyleColor(1);
     }
