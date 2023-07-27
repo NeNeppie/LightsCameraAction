@@ -21,9 +21,9 @@ public partial class PluginWindow
         ImGui.Checkbox("Disable manual resizing", ref Service.Config.LockWindowSize);
 
         var selectedOpenMode = Service.Config.WindowOpenMode;
-        ImGui.Text("\nOpen CameraLoader...");
+        ImGui.Text("\nOpen Lights, Camera, Action...");
         ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
-        if (ImGui.BeginCombo("##OpenCameraLoader", selectedOpenMode.GetDescription()))
+        if (ImGui.BeginCombo("##OpenLCAction", selectedOpenMode.GetDescription()))
         {
             foreach (var openMode in Enum.GetValues<WindowOpenMode>())
             {
@@ -38,7 +38,7 @@ public partial class PluginWindow
 
         ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.5f, 0.5f, 0.5f, 1f));
         ImGui.TextWrapped("Hello there! This is my first plugin, so expect bugs to pop up here and there as I figure things out. " +
-                            "Your help is greatly appreciated.");
+                            "Your feedback is greatly appreciated.");
         ImGui.Text($"\nHappy GPosing!");
         ImGui.PopStyleColor();
 

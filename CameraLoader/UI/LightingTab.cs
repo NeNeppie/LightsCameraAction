@@ -155,7 +155,7 @@ public partial class PluginWindow
             ImGuiUtils.IconText(FontAwesomeIcon.Circle, ImGuiColors.TankBlue); ImGui.SameLine();
             ImGui.TextColored(ImGuiColors.TankBlue, $"B: {color.Z:F0}");
 
-            ImGui.EndDisabled();
+            if (!light.Active) { ImGui.EndDisabled(); }
         }
         ImGui.PopStyleColor(1);
     }

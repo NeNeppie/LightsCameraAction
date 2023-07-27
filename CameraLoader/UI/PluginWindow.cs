@@ -9,7 +9,7 @@ namespace CameraLoader.UI;
 
 public partial class PluginWindow : Window
 {
-    public PluginWindow() : base("CameraLoader")
+    public PluginWindow() : base("Lights, Camera, Action!")
     {
         IsOpen = false;
         Size = new Vector2(250f, 355f);

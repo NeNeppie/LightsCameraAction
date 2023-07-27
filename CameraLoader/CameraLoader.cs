@@ -34,9 +34,9 @@ public class CameraLoader : IDalamudPlugin
         this._pluginInterface.UiBuilder.Draw += this._windowSystem.Draw;
     }
 
-    [Command("/cameraloader")]
-    [Aliases("/cam")]
-    [HelpMessage("Toggles CameraLoader's main window")]
+    [Command("/lcaction")]
+    [Aliases("/lca")]
+    [HelpMessage("Toggles LCAction's main window")]
     public unsafe void OnCommand(string command, string args)
     {
         _window.Toggle();
