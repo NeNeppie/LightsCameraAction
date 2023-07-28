@@ -79,6 +79,7 @@ public partial class PluginWindow
             if (ImGuiUtils.ColoredButton("Load Preset", ImGuiUtils.Blue))
             {
                 _lightingPreset.Load();
+                this._errorMessage = "";
             }
             ImGui.SameLine();
             if (ImGuiUtils.ColoredButton("Rename", ImGuiUtils.Orange))

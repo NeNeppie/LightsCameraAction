@@ -67,7 +67,7 @@ public unsafe class LightingPreset : PresetBase
             if (Lights[i].Active && lightDrawObject == null ||
                 !Lights[i].Active && lightDrawObject != null)
             {
-                Service.GameFunctions.AddRemoveGPoseLight(eventGPoseController, (uint)i);
+                Service.GameFunctions.ToggleGPoseLight(eventGPoseController, (uint)i);
                 lightDrawObject = (DrawObject*)Marshal.ReadIntPtr((nint)eventGPoseController + 0xE0 + (8 * i));
             }
 
