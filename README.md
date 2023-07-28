@@ -22,7 +22,7 @@ A Camera preset stores the following information:
 - Roll angle
 - Pan & Tilt (See the blue instructions window within GPose)
 
-_Note that 3rd `Person Camera Angle` (The setting found in Character Configuration) is not saved._
+_Note that `3rd Person Camera Angle` (The setting found in Character Configuration) is not saved._
 
 A Lighting preset stores the following information:
 
