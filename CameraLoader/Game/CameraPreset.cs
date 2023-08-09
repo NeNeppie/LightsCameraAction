@@ -38,7 +38,7 @@ public unsafe class CameraPreset : PresetBase
         if (_camera->Mode == 0) { relativeRot = MathUtils.SubPiRad(relativeRot); }
 
         this.PositionMode = mode;
-        this.Distance = _camera->Distance;
+        this.Distance = (_camera->Mode == 0) ? 0f : _camera->Distance;
         this.HRotation = relativeRot;
         this.VRotation = _camera->VRotation;
         this.ZoomFoV = _camera->FoV;
@@ -51,8 +51,8 @@ public unsafe class CameraPreset : PresetBase
     public bool IsValid()
     {
         // Zoom check.
-        // Breaks below Min distance. Doesn't go above Max, but Max can be externally modified
-        if (Distance < 1.5f || Distance > 20f) { return false; }
+        // Doesn't go above Max, but Max can be externally modified
+        if (Distance > 20f) { return false; }
 
         // FoV check.
         // Zoom FoV carries outside of gpose! Negative values flip the screen, High positive values are effectively a zoom hack
@@ -68,7 +68,7 @@ public unsafe class CameraPreset : PresetBase
 
     public override bool Load()
     {
-        if (!IsValid()) { return false; }
+        if (!this.IsValid()) { return false; }
 
         float hRotation = HRotation;
         if (PositionMode == (int)PresetMode.Character)
@@ -80,7 +80,8 @@ public unsafe class CameraPreset : PresetBase
         // First Person Mode
         if (_camera->Mode == 0) { hRotation = MathUtils.AddPiRad(hRotation); }
 
-        _camera->Distance = Distance;
+        _camera->Mode = (Distance == 0) ? 0 : 1;
+        _camera->Distance = (Distance == 0) ? 1.5f : Distance;
         _camera->HRotation = hRotation;
         _camera->VRotation = VRotation;
         _camera->FoV = ZoomFoV;

@@ -15,7 +15,7 @@ public class CameraLoader : IDalamudPlugin
     private readonly WindowSystem _windowSystem;
 
     private PluginWindow _window;
-    public string Name => "CameraLoader";
+    public string Name => "Lights, Camera, Action!";
 
     public CameraLoader(DalamudPluginInterface pluginInterface, CommandManager commands)
     {
