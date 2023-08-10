@@ -37,7 +37,7 @@ public unsafe class LightingPreset : PresetBase
             this.Lights[i] = new();
 
             DrawObject* lightDrawObject = (DrawObject*)Marshal.ReadIntPtr((nint)eventGPoseController + 0xE0 + (8 * i));
-            if (lightDrawObject == null) { continue; }
+            if (lightDrawObject is null) { continue; }
 
             var relativePos = lightDrawObject->Position - (Service.ClientState.LocalPlayer?.Position ?? new Vector3(0, 0, 0));
             if (mode == (int)PresetMode.Character)
@@ -64,14 +64,14 @@ public unsafe class LightingPreset : PresetBase
         for (int i = 0; i < 3; i++)
         {
             DrawObject* lightDrawObject = (DrawObject*)Marshal.ReadIntPtr((nint)eventGPoseController + 0xE0 + (8 * i));
-            if (Lights[i].Active && lightDrawObject == null ||
-                !Lights[i].Active && lightDrawObject != null)
+            if (Lights[i].Active && lightDrawObject is null ||
+                !Lights[i].Active && lightDrawObject is not null)
             {
                 Service.GameFunctions.ToggleGPoseLight(eventGPoseController, (uint)i);
                 lightDrawObject = (DrawObject*)Marshal.ReadIntPtr((nint)eventGPoseController + 0xE0 + (8 * i));
             }
 
-            if (lightDrawObject == null) { continue; }
+            if (lightDrawObject is null) { continue; }
 
             var relativePos = Lights[i].relativePos;
             if (PositionMode == (int)PresetMode.Character)

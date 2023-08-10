@@ -19,7 +19,8 @@ public partial class PluginWindow
         bool res = ImGui.BeginTabItem("Camera##CameraTab");
         if (!res) { return; }
 
-        // Drawing here
+        ImGui.Spacing();
+
         bool isInGPose = this.IsInGPose();
         if (!isInGPose)
         {
@@ -27,15 +28,22 @@ public partial class PluginWindow
             _cameraPreset = null;
 
             ImGui.TextWrapped("Unavailable outside of Group Pose");
+
+            ImGui.Spacing();
             ImGui.Separator();
+            ImGui.Spacing();
+
             ImGui.BeginDisabled();
         }
 
-        ImGuiUtils.IconText(FontAwesomeIcon.CameraRetro); ImGui.SameLine();
-        this.DrawPresetModeSelection();
+        // Preset saving
+        ImGuiUtils.IconText(FontAwesomeIcon.CameraRetro);
+        ImGui.SameLine();
 
-        ImGui.SameLine(ImGui.GetContentRegionAvail().X - 60f);
-        if (ImGuiUtils.ColoredIconButton(FontAwesomeIcon.Plus, ImGuiUtils.Green, size: new Vector2(60f, 60f), tooltip: "Create a new preset"))
+        this.DrawPresetModeSelection();
+        ImGui.SameLine(ImGui.GetContentRegionAvail().X - 40f * ImGuiHelpers.GlobalScale);
+
+        if (ImGuiUtils.ColoredIconButton(FontAwesomeIcon.Plus, ImGuiUtils.Green, size: new Vector2(40f, 40f) * ImGuiHelpers.GlobalScale, tooltip: "Create a new preset"))
         {
             var preset = new CameraPreset(_presetMode);
             Service.Config.CameraPresetNames.Add(preset.Name);
@@ -43,14 +51,19 @@ public partial class PluginWindow
             Service.Config.Save();
         }
 
-        ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0f);
+        ImGui.Spacing();
+
+        // Preset selection
+        ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4f * ImGuiHelpers.GlobalScale);
         // TODO: Adjustable height based on rows
-        ImGui.BeginChild("Preset Menu##Camera", new Vector2(0.0f, 300f), true);
+        ImGui.BeginChild("Preset Menu##Camera", new Vector2(0f, 200f * ImGuiHelpers.GlobalScale), true);
         ImGui.PopStyleVar(1);
 
         ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
         ImGui.InputTextWithHint("##Search", "Search...", ref _searchQuery, 30);
         ImGui.PopItemWidth();
+
+        ImGui.Spacing();
 
         for (int i = 0; i < Service.Config.CameraPresets.Count; i++)
         {
@@ -69,13 +82,17 @@ public partial class PluginWindow
         }
         ImGui.EndChild();
 
-        if (_cameraPreset != null)
+        // Preset information
+        if (_cameraPreset is not null)
         {
-            ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0f);
-            ImGui.BeginChild("Preset Detail", new Vector2(0.0f, 230f), true);
+            ImGui.Spacing();
+
+            ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4f * ImGuiHelpers.GlobalScale);
+            ImGui.BeginChild("Preset Detail", new Vector2(0f, 155f * ImGuiHelpers.GlobalScale), true);
             ImGui.PopStyleVar(1);
 
             DrawPresetInfo(ref _cameraPreset);
+
             if (ImGuiUtils.ColoredButton("Load Preset", ImGuiUtils.Blue))
             {
                 if (!_cameraPreset.Load())
@@ -85,12 +102,14 @@ public partial class PluginWindow
                 }
             }
             ImGui.SameLine();
+
             if (ImGuiUtils.ColoredButton("Rename", ImGuiUtils.Orange))
             {
                 this._renameOpen = !_renameOpen;
                 this._errorMessage = "";
             }
             ImGui.SameLine();
+
             if (ImGuiUtils.ColoredButton("Remove", ImGuiUtils.Red))
             {
                 RemovePreset(ref _cameraPreset);
@@ -107,7 +126,7 @@ public partial class PluginWindow
                     var oldName = _cameraPreset.Rename(newName);
                     this._renameOpen = false;
 
-                    if (oldName != null)
+                    if (oldName is not null)
                     {
                         Service.Config.CameraPresetNames.Remove(oldName);
                         Service.Config.CameraPresetNames.Add(newName);
@@ -131,18 +150,23 @@ public partial class PluginWindow
 
     private void DrawPresetInfo(ref CameraPreset preset)
     {
-        string foVFormatted = preset.GposeFoV > 0 ? $"({preset.ZoomFoV:F2}+{preset.GposeFoV})" : $"({preset.ZoomFoV:F2}{preset.GposeFoV})";
+        // FIXME: formatting bug when GposeFoV is 0
+        string fov = preset.GposeFoV > 0 ? $"({preset.ZoomFoV:F2}+{preset.GposeFoV})" : $"({preset.ZoomFoV:F2}{preset.GposeFoV:F2})";
 
         ImGui.TextWrapped(preset.Name);
 
         ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.6f, 0.6f, 0.6f, 1f));
 
         ImGui.TextWrapped($"Mode: {(PresetMode)preset.PositionMode} Position");
-        ImGui.Text($"Zoom: {preset.Distance:F2} , FoV: {(preset.ZoomFoV + preset.GposeFoV):F2} " + foVFormatted);
+        ImGui.Text($"Zoom: {preset.Distance:F2} , FoV: {(preset.ZoomFoV + preset.GposeFoV):F2} " + fov);
         ImGui.Text($"H: {MathUtils.RadToDeg(preset.HRotation):F2}\x00B0 , V: {MathUtils.RadToDeg(preset.VRotation):F2}\x00B0");
 
-        ImGui.Text($"Pan: {MathUtils.RadToDeg(preset.Pan):F0}\x00B0 , "); ImGui.SameLine();
-        ImGui.Text($"Tilt: {MathUtils.RadToDeg(preset.Tilt):F0}\x00B0 , "); ImGui.SameLine();
+        ImGui.Text($"Pan: {MathUtils.RadToDeg(preset.Pan):F0}\x00B0 , ");
+        ImGui.SameLine();
+
+        ImGui.Text($"Tilt: {MathUtils.RadToDeg(preset.Tilt):F0}\x00B0 , ");
+        ImGui.SameLine();
+
         ImGui.Text($"Roll: {MathUtils.RadToDeg(preset.Roll):F0}\x00B0");
 
         ImGui.PopStyleColor(1);

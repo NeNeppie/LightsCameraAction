@@ -19,7 +19,8 @@ public partial class PluginWindow
         bool res = ImGui.BeginTabItem("Lighting##LightingTab");
         if (!res) { return; }
 
-        // Drawing here
+        ImGui.Spacing();
+
         bool isInGPose = this.IsInGPose();
         if (!isInGPose)
         {
@@ -27,15 +28,23 @@ public partial class PluginWindow
             _lightingPreset = null;
 
             ImGui.TextWrapped("Unavailable outside of Group Pose");
+
+            ImGui.Spacing();
             ImGui.Separator();
+            ImGui.Spacing();
+
             ImGui.BeginDisabled();
         }
 
-        ImGuiUtils.IconText(FontAwesomeIcon.Lightbulb); ImGui.SameLine();
-        this.DrawPresetModeSelection();
+        // Preset saving
+        ImGuiUtils.IconText(FontAwesomeIcon.Lightbulb);
+        ImGui.SameLine();
 
-        ImGui.SameLine(ImGui.GetContentRegionAvail().X - 60f);
-        if (ImGuiUtils.ColoredIconButton(FontAwesomeIcon.Plus, ImGuiUtils.Yellow, size: new Vector2(60f, 60f), tooltip: "Create a new preset"))
+        // TODO: Add actual "Camera Position" mode
+        this.DrawPresetModeSelection();
+        ImGui.SameLine(ImGui.GetContentRegionAvail().X - 40f * ImGuiHelpers.GlobalScale);
+
+        if (ImGuiUtils.ColoredIconButton(FontAwesomeIcon.Plus, ImGuiUtils.Yellow, size: new Vector2(40f, 40f) * ImGuiHelpers.GlobalScale, tooltip: "Create a new preset"))
         {
             var preset = new LightingPreset(_presetMode);
             Service.Config.LightingPresetNames.Add(preset.Name);
@@ -43,14 +52,19 @@ public partial class PluginWindow
             Service.Config.Save();
         }
 
-        ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0f);
+        ImGui.Spacing();
+
+        // Preset selection
+        ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4f * ImGuiHelpers.GlobalScale);
         // TODO: Adjustable height based on rows
-        ImGui.BeginChild("Preset Menu##Lighting", new Vector2(0.0f, 300f), true);
+        ImGui.BeginChild("Preset Menu##Lighting", new Vector2(0f, 200f * ImGuiHelpers.GlobalScale), true);
         ImGui.PopStyleVar(1);
 
         ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
         ImGui.InputTextWithHint("##Search", "Search...", ref _searchQuery, 30);
         ImGui.PopItemWidth();
+
+        ImGui.Spacing();
 
         for (int i = 0; i < Service.Config.LightingPresets.Count; i++)
         {
@@ -69,25 +83,31 @@ public partial class PluginWindow
         }
         ImGui.EndChild();
 
+        // Preset information
         if (_lightingPreset != null)
         {
-            ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 5.0f);
-            ImGui.BeginChild("Preset Detail", new Vector2(0.0f, 415f), true);
+            ImGui.Spacing();
+
+            ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4f * ImGuiHelpers.GlobalScale);
+            ImGui.BeginChild("Preset Detail", new Vector2(0f, 280f * ImGuiHelpers.GlobalScale), true);
             ImGui.PopStyleVar(1);
 
             DrawPresetInfo(ref _lightingPreset);
+
             if (ImGuiUtils.ColoredButton("Load Preset", ImGuiUtils.Blue))
             {
                 _lightingPreset.Load();
                 this._errorMessage = "";
             }
             ImGui.SameLine();
+
             if (ImGuiUtils.ColoredButton("Rename", ImGuiUtils.Orange))
             {
                 this._renameOpen = !_renameOpen;
                 this._errorMessage = "";
             }
             ImGui.SameLine();
+
             if (ImGuiUtils.ColoredButton("Remove", ImGuiUtils.Red))
             {
                 RemovePreset(ref _lightingPreset);
@@ -149,10 +169,13 @@ public partial class PluginWindow
             }
 
             var color = light.RGB != Vector3.Zero ? MathUtils.ConvertFloatsTo24BitColor(light.RGB) : Vector3.Zero;
+
             ImGuiUtils.IconText(FontAwesomeIcon.Circle, ImGuiColors.DPSRed); ImGui.SameLine();
             ImGui.TextColored(ImGuiColors.DPSRed, $"R: {color.X:F0}, "); ImGui.SameLine();
+
             ImGuiUtils.IconText(FontAwesomeIcon.Circle, ImGuiColors.HealerGreen); ImGui.SameLine();
             ImGui.TextColored(ImGuiColors.HealerGreen, $"G: {color.Y:F0}, "); ImGui.SameLine();
+
             ImGuiUtils.IconText(FontAwesomeIcon.Circle, ImGuiColors.TankBlue); ImGui.SameLine();
             ImGui.TextColored(ImGuiColors.TankBlue, $"B: {color.Z:F0}");
 

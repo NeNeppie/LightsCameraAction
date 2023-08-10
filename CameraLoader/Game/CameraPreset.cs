@@ -50,18 +50,18 @@ public unsafe class CameraPreset : PresetBase
 
     public bool IsValid()
     {
-        // Zoom check.
         // Doesn't go above Max, but Max can be externally modified
-        if (Distance > 20f) { return false; }
+        if (Distance > 20f)
+            return false;
 
-        // FoV check.
         // Zoom FoV carries outside of gpose! Negative values flip the screen, High positive values are effectively a zoom hack
         // Gpose FoV resets when exiting gpose, but we don't want people suddenly entering gpose during a fight.
-        if (ZoomFoV < 0.69f || ZoomFoV > 0.78f || GposeFoV < -0.5f || GposeFoV > 0.5f) { return false; }
+        if (ZoomFoV < 0.69f || ZoomFoV > 0.78f || GposeFoV < -0.5f || GposeFoV > 0.5f)
+            return false;
 
-        // Pan and Tilt check.
         // Both reset when exiting gpose, but can still be modified beyond the limits the game sets
-        if (Pan < -0.873f || Pan > 0.873f || Tilt < -0.647f || Tilt > 0.342f) { return false; }
+        if (Pan < -0.873f || Pan > 0.873f || Tilt < -0.647f || Tilt > 0.342f)
+            return false;
 
         return true;
     }

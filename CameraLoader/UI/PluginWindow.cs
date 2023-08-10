@@ -1,4 +1,5 @@
-using System.Numerics;
+﻿using System.Numerics;
+using Dalamud.Interface;
 using Dalamud.Interface.Windowing;
 
 using CameraLoader.Config;
@@ -35,22 +36,22 @@ public partial class PluginWindow : Window
             DrawLightingTab();
             DrawSettingsTab();
 #if DEBUG
-            // Debug tab displaying window size
-            ImGui.BeginTabItem(ImGui.GetWindowSize().ToString());
-            ImGui.EndTabItem();
+            //DrawDebugTab();
 #endif
             ImGui.EndTabBar();
         }
 
         var size = ImGui.GetWindowSize();
-        ImGui.SetWindowSize(size with { Y = ImGui.GetCursorPosY() + 5f });
+        ImGui.SetWindowSize(size with { Y = ImGui.GetCursorPosY() + 5f * ImGuiHelpers.GlobalScale });
     }
 
     private ImGuiWindowFlags GetWindowFlags()
     {
-        var flags = ImGuiWindowFlags.None;
-        if (Service.Config.LockWindowPosition) { flags |= ImGuiWindowFlags.NoMove; }
-        if (Service.Config.LockWindowSize) { flags |= ImGuiWindowFlags.NoResize; }
+        var flags = ImGuiWindowFlags.NoScrollbar;
+        if (Service.Config.LockWindowPosition)
+            flags |= ImGuiWindowFlags.NoMove;
+        if (Service.Config.LockWindowSize)
+            flags |= ImGuiWindowFlags.NoResize;
         return flags;
     }
 
