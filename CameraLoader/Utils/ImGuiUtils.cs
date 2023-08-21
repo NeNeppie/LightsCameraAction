@@ -5,56 +5,23 @@ using ImGuiNET;
 
 namespace CameraLoader.Utils;
 
-public class ImGuiButtonColors
-{
-    public Vector4 Normal;
-    public Vector4 Hovered;
-    public Vector4 Active;
-
-    public ImGuiButtonColors(Vector4 normal, Vector4 hovered, Vector4 active)
-    {
-        Normal = normal;
-        Hovered = hovered;
-        Active = active;
-    }
-}
-
 public static class ImGuiUtils
 {
-    public static ImGuiButtonColors Green => new(
-        new(0.2f, 0.8f, 0.41f, 0.7f),
-        new(0.2f, 0.9f, 0.41f, 0.7f),
-        new(0.2f, 1f, 0.41f, 0.7f));
-
-    public static ImGuiButtonColors Red => new(
-        new(0.78f, 0.33f, 0.33f, 0.7f),
-        new(0.88f, 0.33f, 0.33f, 0.7f),
-        new(0.99f, 0.33f, 0.33f, 0.7f));
-
-    public static ImGuiButtonColors Blue => new(
-        new(0.2f, 0.5f, 0.9f, 0.7f),
-        new(0.2f, 0.6f, 1f, 0.7f),
-        new(0.25f, 0.65f, 1f, 0.7f));
-
-    public static ImGuiButtonColors Yellow => new(
-        new(0.87f, 0.87f, 0.3f, 0.7f),
-        new(0.95f, 0.95f, 0.4f, 0.7f),
-        new(1f, 1f, 0.5f, 0.7f));
-
-    public static ImGuiButtonColors Orange => new(
-        new(0.9f, 0.65f, 0.2f, 0.7f),
-        new(0.95f, 0.70f, 0.2f, 0.7f),
-        new(1f, 0.75f, 0.2f, 0.7f));
+    public static Vector4 Green => new(0.2f, 0.8f, 0.41f, 0.7f);
+    public static Vector4 Red => new(0.78f, 0.33f, 0.33f, 0.7f);
+    public static Vector4 Blue => new(0.2f, 0.5f, 0.9f, 0.7f);
+    public static Vector4 Yellow => new(0.87f, 0.87f, 0.3f, 0.7f);
+    public static Vector4 Orange => new(0.9f, 0.65f, 0.2f, 0.7f);
 
     public static Vector2 ButtonSizeLarge => new Vector2(2.5f * ImGui.GetFontSize()) + ImGui.GetStyle().FramePadding;
     public static Vector2 ButtonSize => new Vector2(1.5f * ImGui.GetFontSize()) + ImGui.GetStyle().FramePadding;
     public static float FrameRounding => ImGuiHelpers.GlobalScale * 4f;
 
-    public static bool ColoredButton(string label, ImGuiButtonColors colors, Vector2 size = default, string tooltip = null, bool small = false)
+    public static bool ColoredButton(string label, Vector4 color, Vector2 size = default, string tooltip = null, bool small = false)
     {
-        ImGui.PushStyleColor(ImGuiCol.Button, colors.Normal);
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, colors.Hovered);
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, colors.Active);
+        ImGui.PushStyleColor(ImGuiCol.Button, color);
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, color * new Vector4(1f, 1f, 1f, 1.2f));
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, color * new Vector4(1f, 1f, 1f, 1.5f));
 
         bool res = small ? ImGui.SmallButton(label) : ImGui.Button(label, size);
         if (tooltip != null && ImGui.IsItemHovered())
@@ -83,12 +50,11 @@ public static class ImGuiUtils
         return res;
     }
 
-    public static bool ColoredIconButton(FontAwesomeIcon icon, ImGuiButtonColors colors, Vector2 size = default, string tooltip = null, bool small = false)
+    public static bool ColoredIconButton(FontAwesomeIcon icon, Vector4 color, Vector2 size = default, string tooltip = null, bool small = false)
     {
-        // TODO: Multiply one color instead of having 3, simplfy ImGuiButtonColors (or remove altogether)
-        ImGui.PushStyleColor(ImGuiCol.Button, colors.Normal);
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, colors.Hovered);
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, colors.Active);
+        ImGui.PushStyleColor(ImGuiCol.Button, color);
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, color * new Vector4(1f, 1f, 1f, 1.2f));
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, color * new Vector4(1f, 1f, 1f, 1.5f));
 
         bool res = IconButton(icon, size, tooltip, small);
 
