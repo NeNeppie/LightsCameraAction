@@ -8,7 +8,8 @@ namespace CameraLoader.Game;
 public enum PresetMode
 {
     Character,
-    Camera
+    CameraOrientation,
+    CameraPosition
 }
 
 public unsafe abstract class PresetBase
@@ -23,7 +24,7 @@ public unsafe abstract class PresetBase
     {
         var cameraManager = (CameraManager*)Service.SigScanner.GetStaticAddressFromSig("4C 8D 35 ?? ?? ?? ?? 85 D2");
         _camera = cameraManager->WorldCamera;
-        PluginLog.Debug($"Pointer to game camera @ 0x{((IntPtr)_camera).ToString("X16")}");
+        PluginLog.Debug($"Pointer to game camera @ 0x{(IntPtr)_camera:X16}");
     }
 
     public abstract bool Load();

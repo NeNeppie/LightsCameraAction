@@ -9,44 +9,29 @@ using ImGuiNET;
 
 namespace CameraLoader.UI;
 
-public partial class PluginWindow
+public class LightingTab : PresetTabBase
 {
-    private int _lightingIndex = -1;
-    private LightingPreset _lightingPreset = null;
+    // TODO: Adjustable height based on rows (settings)
+    private static int RowsVisible => 5;
+    private static float SelectionHeight => ImGui.GetFrameHeightWithSpacing() + (ImGui.GetTextLineHeight() + ImGui.GetStyle().ItemSpacing.Y) * RowsVisible;
+    private static float InfoHeight => ImGui.GetTextLineHeightWithSpacing() * 11f + ImGui.GetStyle().ItemSpacing.Y * 3f + ImGui.GetFrameHeightWithSpacing() * 2f;
 
-    public void DrawLightingTab()
+    public void Draw()
     {
-        bool res = ImGui.BeginTabItem("Lighting##LightingTab");
+        bool res = ImGui.BeginTabItem("Lighting");
         if (!res) { return; }
 
         ImGui.Spacing();
 
-        bool isInGPose = this.IsInGPose();
-        if (!isInGPose)
-        {
-            _lightingIndex = -1;
-            _lightingPreset = null;
-
-            ImGui.TextWrapped("Unavailable outside of Group Pose");
-
-            ImGui.Spacing();
-            ImGui.Separator();
-            ImGui.Spacing();
-
-            ImGui.BeginDisabled();
-        }
+        bool isInGPose = IsInGPose();
 
         // Preset saving
-        ImGuiUtils.IconText(FontAwesomeIcon.Lightbulb);
-        ImGui.SameLine();
+        DrawModeSelection();
+        ImGui.SameLine(ImGui.GetContentRegionAvail().X - ImGuiUtils.ButtonSizeLarge.X);
 
-        // TODO: Add actual "Camera Position" mode
-        this.DrawPresetModeSelection();
-        ImGui.SameLine(ImGui.GetContentRegionAvail().X - 40f * ImGuiHelpers.GlobalScale);
-
-        if (ImGuiUtils.ColoredIconButton(FontAwesomeIcon.Plus, ImGuiUtils.Yellow, size: new Vector2(40f, 40f) * ImGuiHelpers.GlobalScale, tooltip: "Create a new preset"))
+        if (ImGuiUtils.ColoredIconButton(FontAwesomeIcon.Plus, ImGuiUtils.Yellow, ImGuiUtils.ButtonSizeLarge, "Create a new preset"))
         {
-            var preset = new LightingPreset(_presetMode);
+            var preset = new LightingPreset(SelectedMode);
             Service.Config.LightingPresetNames.Add(preset.Name);
             Service.Config.LightingPresets.Add(preset);
             Service.Config.Save();
@@ -55,90 +40,62 @@ public partial class PluginWindow
         ImGui.Spacing();
 
         // Preset selection
-        ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4f * ImGuiHelpers.GlobalScale);
-        // TODO: Adjustable height based on rows
-        ImGui.BeginChild("Preset Menu##Lighting", new Vector2(0f, 200f * ImGuiHelpers.GlobalScale), true);
+        ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, ImGuiUtils.FrameRounding);
+        ImGui.BeginChild("Preset Menu##Lighting", new Vector2(0f, SelectionHeight + ImGuiUtils.FrameRounding * 2f), true);
         ImGui.PopStyleVar(1);
 
         ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
-        ImGui.InputTextWithHint("##Search", "Search...", ref _searchQuery, 30);
+        ImGui.InputTextWithHint("##Search", "Search...", ref SearchQuery, 30);
         ImGui.PopItemWidth();
-
-        ImGui.Spacing();
 
         for (int i = 0; i < Service.Config.LightingPresets.Count; i++)
         {
             var preset = Service.Config.LightingPresets[i];
-            if (!preset.Name.ToLower().Contains(_searchQuery.ToLower())) { continue; }
+            if (!preset.Name.ToLower().Contains(SearchQuery.ToLower())) { continue; }
 
-            bool isCurrentSelected = _lightingIndex == i;
-            if (ImGui.Selectable($"{preset.Name}##Lighting", isCurrentSelected))
+            bool isCurrentSelected = PresetIndex == i;
+            if (ImGui.Selectable($"{preset.Name}", isCurrentSelected))
             {
-                this._lightingIndex = isCurrentSelected ? -1 : i;
-                this._lightingPreset = isCurrentSelected ? null : preset;
+                PresetIndex = isCurrentSelected ? -1 : i;
+                SelectedPreset = isCurrentSelected ? null : preset;
 
-                this._renameOpen = false;
-                this._errorMessage = "";
+                RenameOpen = false;
+                ErrorMessage = "";
             }
         }
         ImGui.EndChild();
 
         // Preset information
-        if (_lightingPreset != null)
+        if (SelectedPreset is not null)
         {
             ImGui.Spacing();
 
-            ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4f * ImGuiHelpers.GlobalScale);
-            ImGui.BeginChild("Preset Detail", new Vector2(0f, 280f * ImGuiHelpers.GlobalScale), true);
+            ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, ImGuiUtils.FrameRounding);
+            ImGui.BeginChild("Preset Detail", new Vector2(0f, InfoHeight + ImGuiUtils.FrameRounding * 2f), true, ImGuiWindowFlags.NoScrollbar);
             ImGui.PopStyleVar(1);
 
-            DrawPresetInfo(ref _lightingPreset);
+            DrawPresetInfo();
 
             if (ImGuiUtils.ColoredButton("Load Preset", ImGuiUtils.Blue))
             {
-                _lightingPreset.Load();
-                this._errorMessage = "";
+                SelectedPreset.Load();
+                ErrorMessage = "";
             }
             ImGui.SameLine();
 
             if (ImGuiUtils.ColoredButton("Rename", ImGuiUtils.Orange))
             {
-                this._renameOpen = !_renameOpen;
-                this._errorMessage = "";
+                RenameOpen = !RenameOpen;
+                ErrorMessage = "";
             }
             ImGui.SameLine();
 
             if (ImGuiUtils.ColoredButton("Remove", ImGuiUtils.Red))
-            {
-                RemovePreset(ref _lightingPreset);
-                this._lightingIndex = -1;
-                this._lightingPreset = null;
-            }
+                RemovePreset();
 
-            if (_renameOpen)
-            {
-                string newName = _lightingPreset.Name;
-                ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
-                if (ImGui.InputText("##RenameLighting", ref newName, 30, ImGuiInputTextFlags.EnterReturnsTrue))
-                {
-                    var oldName = _lightingPreset.Rename(newName);
-                    this._renameOpen = false;
+            if (RenameOpen) { DrawRename(); }
 
-                    if (oldName != null)
-                    {
-                        Service.Config.LightingPresetNames.Remove(oldName);
-                        Service.Config.LightingPresetNames.Add(newName);
-                        Service.Config.Save();
-                    }
-                    else
-                    {
-                        this._errorMessage = "Names must be unique";
-                    }
-                }
-                ImGui.PopItemWidth();
-            }
-
-            this.DrawErrorMessage();
+            DrawErrorMessage();
             ImGui.EndChild();
         }
 
@@ -146,26 +103,53 @@ public partial class PluginWindow
         ImGui.EndTabItem();
     }
 
-    private void DrawPresetInfo(ref LightingPreset preset)
+    private void DrawModeSelection()
     {
-        ImGui.TextWrapped(preset.Name);
+        ImGuiUtils.IconText(FontAwesomeIcon.Lightbulb);
+        ImGui.SameLine();
+
+        ImGui.Text("Preset Mode:");
+        ImGui.BeginGroup();
+        {
+            ImGui.RadioButton("Character Position", ref SelectedMode, (int)PresetMode.Character);
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.SetTooltip("Presets are saved and loaded relative to your character's orientation and position.");
+            }
+            ImGui.RadioButton("Camera Orientation", ref SelectedMode, (int)PresetMode.CameraOrientation);
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.SetTooltip("Presets are saved relative to the camera's orientation. This is equivalent to the \"Camera Position\" setting in-game.");
+            }
+            ImGui.RadioButton("Camera Position (New)", ref SelectedMode, (int)PresetMode.CameraPosition);
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.SetTooltip("Presets are saved and loaded relative to the camera's orientation and position.");
+            }
+        }
+        ImGui.EndGroup();
+    }
+
+    private void DrawPresetInfo()
+    {
+        ImGui.TextWrapped(SelectedPreset.Name);
 
         ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.6f, 0.6f, 0.6f, 1f));
-        ImGui.TextWrapped($"Mode: {(PresetMode)preset.PositionMode} Position");
+        ImGui.TextWrapped($"Mode: {(PresetMode)SelectedPreset.PositionMode}");  // FIXME: Formatting Error
 
         int i = 1;
-        foreach (var light in preset.Lights)
+        foreach (var light in ((LightingPreset)SelectedPreset).Lights)
         {
             ImGui.Separator();
             if (!light.Active) { ImGui.BeginDisabled(); }
 
             ImGui.Text($"Light {i++} | Type: {3 - light.Type}");
-            ImGui.Text($"Position: {light.relativePos.ToString("F2")}");
+            ImGui.Text($"Position: {light.RelativePos:F2}");
 
-            if (preset.PositionMode == (int)PresetMode.Character)
+            if (SelectedPreset.PositionMode == (int)PresetMode.Character)
             {
                 ImGui.SameLine();
-                ImGui.Text($"({MathUtils.RadToDeg(light.relativeRot):F2}\x00B0)");
+                ImGui.Text($"({MathUtils.RadToDeg(light.RelativeRot):F2}\x00B0)");
             }
 
             var color = light.RGB != Vector3.Zero ? MathUtils.ConvertFloatsTo24BitColor(light.RGB) : Vector3.Zero;
@@ -184,10 +168,34 @@ public partial class PluginWindow
         ImGui.PopStyleColor(1);
     }
 
-    private void RemovePreset(ref LightingPreset preset)
+    private void DrawRename()
     {
-        Service.Config.LightingPresetNames.Remove(preset.Name);
-        Service.Config.LightingPresets.Remove(preset);
+        string newName = SelectedPreset.Name;
+        ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
+        if (ImGui.InputText("##RenameLighting", ref newName, 30, ImGuiInputTextFlags.EnterReturnsTrue))
+        {
+            var oldName = SelectedPreset.Rename(newName);
+            RenameOpen = false;
+
+            if (oldName is not null)
+            {
+                Service.Config.LightingPresetNames.Remove(oldName);
+                Service.Config.LightingPresetNames.Add(newName);
+                Service.Config.Save();
+            }
+            else
+                ErrorMessage = "Names must be unique";
+        }
+        ImGui.PopItemWidth();
+    }
+
+    private void RemovePreset()
+    {
+        Service.Config.LightingPresetNames.Remove(SelectedPreset.Name);
+        Service.Config.LightingPresets.Remove((LightingPreset)SelectedPreset);
         Service.Config.Save();
+
+        PresetIndex = -1;
+        SelectedPreset = null;
     }
 }

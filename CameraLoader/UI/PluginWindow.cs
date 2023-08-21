@@ -10,6 +10,9 @@ namespace CameraLoader.UI;
 
 public partial class PluginWindow : Window
 {
+    private readonly CameraTab CameraTab;
+    private readonly LightingTab LightingTab;
+
     public PluginWindow() : base("Lights, Camera, Action!")
     {
         IsOpen = false;
@@ -22,6 +25,9 @@ public partial class PluginWindow : Window
         SizeCondition = ImGuiCond.FirstUseEver;
 
         Service.GPoseHooking.OnEnterGposeEvent += WindowBehaviourCheck;
+
+        LightingTab = new LightingTab();
+        CameraTab = new CameraTab();
     }
 
     public override void Draw()
@@ -32,8 +38,8 @@ public partial class PluginWindow : Window
 
         if (ImGui.BeginTabBar("##TabBar", ImGuiTabBarFlags.None))
         {
-            DrawCameraTab();
-            DrawLightingTab();
+            CameraTab.Draw();
+            LightingTab.Draw();
             DrawSettingsTab();
 #if DEBUG
             //DrawDebugTab();
@@ -45,7 +51,7 @@ public partial class PluginWindow : Window
         ImGui.SetWindowSize(size with { Y = ImGui.GetCursorPosY() + 5f * ImGuiHelpers.GlobalScale });
     }
 
-    private ImGuiWindowFlags GetWindowFlags()
+    private static ImGuiWindowFlags GetWindowFlags()
     {
         var flags = ImGuiWindowFlags.NoScrollbar;
         if (Service.Config.LockWindowPosition)

@@ -21,30 +21,34 @@ public class ImGuiButtonColors
 
 public static class ImGuiUtils
 {
-    public static ImGuiButtonColors Green = new(
+    public static ImGuiButtonColors Green => new(
         new(0.2f, 0.8f, 0.41f, 0.7f),
         new(0.2f, 0.9f, 0.41f, 0.7f),
         new(0.2f, 1f, 0.41f, 0.7f));
 
-    public static ImGuiButtonColors Red = new(
+    public static ImGuiButtonColors Red => new(
         new(0.78f, 0.33f, 0.33f, 0.7f),
         new(0.88f, 0.33f, 0.33f, 0.7f),
         new(0.99f, 0.33f, 0.33f, 0.7f));
 
-    public static ImGuiButtonColors Blue = new(
+    public static ImGuiButtonColors Blue => new(
         new(0.2f, 0.5f, 0.9f, 0.7f),
         new(0.2f, 0.6f, 1f, 0.7f),
         new(0.25f, 0.65f, 1f, 0.7f));
 
-    public static ImGuiButtonColors Yellow = new(
+    public static ImGuiButtonColors Yellow => new(
         new(0.87f, 0.87f, 0.3f, 0.7f),
         new(0.95f, 0.95f, 0.4f, 0.7f),
         new(1f, 1f, 0.5f, 0.7f));
 
-    public static ImGuiButtonColors Orange = new(
+    public static ImGuiButtonColors Orange => new(
         new(0.9f, 0.65f, 0.2f, 0.7f),
         new(0.95f, 0.70f, 0.2f, 0.7f),
         new(1f, 0.75f, 0.2f, 0.7f));
+
+    public static Vector2 ButtonSizeLarge => new Vector2(2.5f * ImGui.GetFontSize()) + ImGui.GetStyle().FramePadding;
+    public static Vector2 ButtonSize => new Vector2(1.5f * ImGui.GetFontSize()) + ImGui.GetStyle().FramePadding;
+    public static float FrameRounding => ImGuiHelpers.GlobalScale * 4f;
 
     public static bool ColoredButton(string label, ImGuiButtonColors colors, Vector2 size = default, string tooltip = null, bool small = false)
     {
@@ -81,6 +85,7 @@ public static class ImGuiUtils
 
     public static bool ColoredIconButton(FontAwesomeIcon icon, ImGuiButtonColors colors, Vector2 size = default, string tooltip = null, bool small = false)
     {
+        // TODO: Multiply one color instead of having 3, simplfy ImGuiButtonColors (or remove altogether)
         ImGui.PushStyleColor(ImGuiCol.Button, colors.Normal);
         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, colors.Hovered);
         ImGui.PushStyleColor(ImGuiCol.ButtonActive, colors.Active);

@@ -6,44 +6,42 @@ using ImGuiNET;
 
 namespace CameraLoader.UI;
 
-public partial class PluginWindow
+public abstract class PresetTabBase
 {
-    private bool _renameOpen = false;
-    private string _errorMessage = "";
-    private string _searchQuery = "";
-    private static int _presetMode = (int)PresetMode.Character;
+    protected bool RenameOpen = false;
+    protected string ErrorMessage = "";
+    protected string SearchQuery = "";
 
-    private bool IsInGPose()
+    protected int SelectedMode = (int)PresetMode.Character;
+    protected PresetBase SelectedPreset = null;
+    protected int PresetIndex = -1;
+
+    protected bool IsInGPose()
     {
         bool isInCameraMode = Service.Conditions[Dalamud.Game.ClientState.Conditions.ConditionFlag.WatchingCutscene];
         bool gposeActorExists = Service.ObjectTable[201] != null;
-        return (isInCameraMode && gposeActorExists);
-    }
-
-    private void DrawPresetModeSelection()
-    {
-        ImGui.Text("Preset Mode:");
-        ImGui.BeginGroup();
+        if (!(isInCameraMode && gposeActorExists))
         {
-            ImGui.RadioButton("Character Position", ref _presetMode, (int)PresetMode.Character);
-            if (ImGui.IsItemHovered())
-            {
-                ImGui.SetTooltip("Presets are saved and loaded relative to your character's orientation");
-            }
-            ImGui.RadioButton("Camera Position", ref _presetMode, (int)PresetMode.Camera);
-            if (ImGui.IsItemHovered())
-            {
-                ImGui.SetTooltip("Presets are saved relative to the camera's current orientation.\nYour character's orientation is not taken into account");
-            }
+            PresetIndex = -1;
+            SelectedPreset = null;
+
+            ImGui.TextWrapped("Unavailable outside of Group Pose");
+
+            ImGui.Spacing();
+            ImGui.Separator();
+            ImGui.Spacing();
+
+            ImGui.BeginDisabled();
+            return false;
         }
-        ImGui.EndGroup();
+        return true;
     }
 
-    private void DrawErrorMessage()
+    protected void DrawErrorMessage()
     {
-        if (_errorMessage != "")
+        if (ErrorMessage != "")
         {
-            ImGui.TextColored(new Vector4(1, 0, 0, 1), _errorMessage);
+            ImGui.TextColored(new Vector4(1, 0, 0, 1), ErrorMessage);
         }
     }
 }
