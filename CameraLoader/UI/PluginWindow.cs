@@ -24,7 +24,7 @@ public partial class PluginWindow : Window
         };
         SizeCondition = ImGuiCond.FirstUseEver;
 
-        Service.GPoseHooking.OnEnterGposeEvent += WindowBehaviourCheck;
+        Service.GPoseHooking.OnGPoseStateChangeEvent += WindowBehaviourCheck;
 
         LightingTab = new LightingTab();
         CameraTab = new CameraTab();
@@ -61,11 +61,11 @@ public partial class PluginWindow : Window
         return flags;
     }
 
-    private void WindowBehaviourCheck()
+    private void WindowBehaviourCheck(bool entered)
     {
         if (Service.Config.WindowOpenMode == WindowOpenMode.OnEnterGPose)
         {
-            this.IsOpen = true;
+            this.IsOpen = entered;
         }
     }
 }

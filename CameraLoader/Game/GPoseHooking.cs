@@ -7,34 +7,52 @@ namespace CameraLoader.Game;
 
 public class GPoseHooking : IDisposable
 {
-    public delegate void OnEnterGposeDelegate();
-    public event OnEnterGposeDelegate OnEnterGposeEvent;
+    public delegate void OnGPoseStateChangeDelegate(bool entered);
+    public event OnGPoseStateChangeDelegate OnGPoseStateChangeEvent;
 
     public delegate bool EnterGPoseDelegate(IntPtr addr);
-    private Hook<EnterGPoseDelegate> _enterGPoseDelegateHook = null;
+    private Hook<EnterGPoseDelegate> _enterGPoseHook = null;
+
+    public delegate void ExitGPoseDelegate(IntPtr addr);
+    private Hook<ExitGPoseDelegate> _exitGPoseHook = null;
 
     public unsafe GPoseHooking()
     {
         UIModule* uiModule = Framework.Instance()->GetUiModule();
         var enterGPoseAddress = (nint)uiModule->VTable->EnterGPose;
-        _enterGPoseDelegateHook = Hook<EnterGPoseDelegate>.FromAddress(enterGPoseAddress, this.EnterGPoseDetour);
-        _enterGPoseDelegateHook.Enable();
+        var exitGPoseAddress = (nint)uiModule->VTable->ExitGPose;
+
+        _enterGPoseHook = Hook<EnterGPoseDelegate>.FromAddress(enterGPoseAddress, this.EnterGPoseDetour);
+        _exitGPoseHook = Hook<ExitGPoseDelegate>.FromAddress(exitGPoseAddress, this.ExitGPoseDetour);
+
+        _enterGPoseHook.Enable();
+        _exitGPoseHook.Enable();
     }
 
     private bool EnterGPoseDetour(IntPtr addr)
     {
-        var entered = _enterGPoseDelegateHook!.Original.Invoke(addr);
+        var entered = _enterGPoseHook!.Original.Invoke(addr);
         if (entered)
         {
-            OnEnterGposeEvent.Invoke();
+            OnGPoseStateChangeEvent.Invoke(true);
         }
         return entered;
     }
 
+    private void ExitGPoseDetour(IntPtr addr)
+    {
+        _exitGPoseHook!.Original.Invoke(addr);
+        OnGPoseStateChangeEvent.Invoke(false);
+    }
+
     public void Dispose()
     {
-        this._enterGPoseDelegateHook.Disable();
-        this._enterGPoseDelegateHook.Dispose();
-        OnEnterGposeEvent = null;
+        _enterGPoseHook.Disable();
+        _exitGPoseHook.Disable();
+
+        _enterGPoseHook.Dispose();
+        _exitGPoseHook.Dispose();
+
+        OnGPoseStateChangeEvent = null;
     }
 }

@@ -11,16 +11,12 @@ static class WindowOpenModeEx
 {
     public static string GetDescription(this WindowOpenMode value)
     {
-        switch (value)
+        return value switch
         {
-            case WindowOpenMode.Manual:
-                return "Manually";
-            case WindowOpenMode.OnEnterGPose:
-                return "When entering GPose";
-            case WindowOpenMode.OnStartup:
-                return "On Startup";
-            default:
-                return value.ToString();
-        }
+            WindowOpenMode.Manual => "Manually",
+            WindowOpenMode.OnEnterGPose => "When entering GPose",
+            WindowOpenMode.OnStartup => "On Startup",
+            _ => value.ToString(),
+        };
     }
 }
