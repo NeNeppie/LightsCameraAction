@@ -11,9 +11,7 @@ namespace CameraLoader.UI;
 
 public class LightingTab : PresetTabBase
 {
-    // TODO: Adjustable height based on rows (settings)
-    private static int RowsVisible => 5;
-    private static float SelectionHeight => ImGui.GetFrameHeightWithSpacing() + (ImGui.GetTextLineHeight() + ImGui.GetStyle().ItemSpacing.Y) * RowsVisible;
+    private static float SelectionHeight => ImGui.GetFrameHeightWithSpacing() + (ImGui.GetTextLineHeight() + ImGui.GetStyle().ItemSpacing.Y) * Service.Config.RowsVisibleLighting;
     private static float InfoHeight => ImGui.GetTextLineHeightWithSpacing() * 11f + ImGui.GetStyle().ItemSpacing.Y * 3f + ImGui.GetFrameHeightWithSpacing() * 2f;
 
     public void Draw()
@@ -113,19 +111,15 @@ public class LightingTab : PresetTabBase
         {
             ImGui.RadioButton("Character Position", ref SelectedMode, (int)PresetMode.Character);
             if (ImGui.IsItemHovered())
-            {
                 ImGui.SetTooltip("Presets are saved and loaded relative to your character's orientation and position.");
-            }
+
             ImGui.RadioButton("Camera Orientation", ref SelectedMode, (int)PresetMode.CameraOrientation);
             if (ImGui.IsItemHovered())
-            {
                 ImGui.SetTooltip("Presets are saved relative to the camera's orientation. This is equivalent to the \"Camera Position\" setting in-game.");
-            }
+
             ImGui.RadioButton("Camera Position (New)", ref SelectedMode, (int)PresetMode.CameraPosition);
             if (ImGui.IsItemHovered())
-            {
                 ImGui.SetTooltip("Presets are saved and loaded relative to the camera's orientation and position.");
-            }
         }
         ImGui.EndGroup();
     }

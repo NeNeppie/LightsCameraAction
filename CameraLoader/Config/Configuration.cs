@@ -15,6 +15,8 @@ public class Configuration : IPluginConfiguration
     public bool LockWindowPosition = false;
     public bool LockWindowSize = false;
     public WindowOpenMode WindowOpenMode = 0;
+    public int RowsVisibleCamera = 5;
+    public int RowsVisibleLighting = 5;
 
     public List<CameraPreset> CameraPresets = new();
     public List<LightingPreset> LightingPresets = new();
