@@ -10,8 +10,8 @@ namespace CameraLoader.Game;
 public class LightInfo
 {
     public bool Active { get; set; }
-    public float relativeRot { get; set; }
-    public Vector3 relativePos { get; set; }
+    public float RelativeRot { get; set; }
+    public Vector3 RelativePos { get; set; }
     public Vector3 RGB { get; set; }
     public byte Type { get; set; }
 }
@@ -39,17 +39,19 @@ public unsafe class LightingPreset : PresetBase
             DrawObject* lightDrawObject = (DrawObject*)Marshal.ReadIntPtr((nint)eventGPoseController + 0xE0 + (8 * i));
             if (lightDrawObject is null) { continue; }
 
-            var relativePos = lightDrawObject->Position - (Service.ClientState.LocalPlayer?.Position ?? new Vector3(0, 0, 0));
-            if (mode == (int)PresetMode.Character)
+            var relativeObjectPos = mode == (int)PresetMode.CameraPosition ? _camera->Position : Service.ClientState.LocalPlayer?.Position ?? new(0, 0, 0);
+            var relativeObjectRot = mode == (int)PresetMode.CameraPosition ? _camera->HRotation - 1.5707f : Service.ClientState.LocalPlayer?.Rotation ?? 0f;
+
+            var relativePos = lightDrawObject->Position - relativeObjectPos;
+            if (mode == (int)PresetMode.Character || mode == (int)PresetMode.CameraPosition)
             {
-                var playerRot = Service.ClientState.LocalPlayer?.Rotation ?? 0f;
-                var theta = MathUtils.ConvertToRelative(MathUtils.GetHorizontalRotation(relativePos), playerRot);
-                this.Lights[i].relativeRot = theta; // For display only
-                (relativePos.X, relativePos.Z) = MathUtils.RotatePoint2D((relativePos.X, relativePos.Z), playerRot);
+                var theta = MathUtils.ConvertToRelative(MathUtils.GetHorizontalRotation(relativePos), relativeObjectRot);
+                this.Lights[i].RelativeRot = theta; // For display only
+                (relativePos.X, relativePos.Z) = MathUtils.RotatePoint2D((relativePos.X, relativePos.Z), relativeObjectRot);
             }
 
             this.Lights[i].Active = true;
-            this.Lights[i].relativePos = relativePos;
+            this.Lights[i].RelativePos = relativePos;
             this.Lights[i].RGB = lightDrawObject->LightObject->RGB;
             this.Lights[i].Type = lightDrawObject->LightObject->Type;
         }
@@ -73,14 +75,16 @@ public unsafe class LightingPreset : PresetBase
 
             if (lightDrawObject is null) { continue; }
 
-            var relativePos = Lights[i].relativePos;
-            if (PositionMode == (int)PresetMode.Character)
+            var relativeObjectPos = PositionMode == (int)PresetMode.CameraPosition ? _camera->Position : Service.ClientState.LocalPlayer?.Position ?? new(0, 0, 0);
+            var relativeObjectRot = PositionMode == (int)PresetMode.CameraPosition ? _camera->HRotation - 1.5707f : Service.ClientState.LocalPlayer?.Rotation ?? 0f;
+
+            var relativePos = Lights[i].RelativePos;
+            if (PositionMode == (int)PresetMode.Character || PositionMode == (int)PresetMode.CameraPosition)
             {
-                var playerRot = Service.ClientState.LocalPlayer?.Rotation ?? 0f;
-                (relativePos.X, relativePos.Z) = MathUtils.RotatePoint2D((relativePos.X, relativePos.Z), playerRot);
+                (relativePos.X, relativePos.Z) = MathUtils.RotatePoint2D((relativePos.X, relativePos.Z), relativeObjectRot);
             }
 
-            lightDrawObject->Position = relativePos + (Service.ClientState.LocalPlayer?.Position ?? new Vector3(0, 0, 0));
+            lightDrawObject->Position = relativePos + relativeObjectPos;
             lightDrawObject->LightObject->RGB = Lights[i].RGB;
             lightDrawObject->LightObject->Type = Lights[i].Type;
             Service.GameFunctions.UpdateFalloffDistance(lightDrawObject->LightObject);

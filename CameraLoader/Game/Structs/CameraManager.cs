@@ -1,3 +1,4 @@
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace CameraLoader.Game.Structs;
@@ -8,6 +9,7 @@ namespace CameraLoader.Game.Structs;
 [StructLayout(LayoutKind.Explicit)]
 public unsafe struct GameCamera
 {
+    [FieldOffset(0x60)] public Vector3 Position;
     [FieldOffset(0x114)] public float Distance;     // default is 6
     [FieldOffset(0x118)] public float MinDistance;  // 1.5
     [FieldOffset(0x11C)] public float MaxDistance;  // 20
