@@ -6,6 +6,7 @@ using CameraLoader.Game;
 using CameraLoader.Utils;
 
 using ImGuiNET;
+using System;
 
 namespace CameraLoader.UI;
 
@@ -112,14 +113,13 @@ public class CameraTab : PresetTabBase
 
         ImGui.Text("Preset Mode:");
         ImGui.BeginGroup();
+        foreach (var mode in Enum.GetValues<PresetMode>())
         {
-            ImGui.RadioButton("Character Position", ref SelectedMode, (int)PresetMode.Character);
-            if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Presets are saved and loaded relative to your character's orientation and position.");
+            if (mode == PresetMode.CameraOrientation) continue;
 
-            ImGui.RadioButton("Camera Orientation", ref SelectedMode, (int)PresetMode.CameraOrientation);
+            ImGui.RadioButton(mode.GetDescription(), ref SelectedMode, (int)mode);
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Presets are saved relative to the camera's orientation. This is equivalent to the \"Camera Position\" setting in-game.");
+                ImGui.SetTooltip(mode.GetTooltip());
         }
         ImGui.EndGroup();
     }
@@ -133,7 +133,7 @@ public class CameraTab : PresetTabBase
         ImGui.TextWrapped(preset.Name);
 
         ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.6f, 0.6f, 0.6f, 1f));
-        ImGui.TextWrapped($"Mode: {(PresetMode)preset.PositionMode}");  // FIXME: Formatting Error
+        ImGui.TextWrapped($"Mode: {((PresetMode)preset.PositionMode).GetDescription()}");
 
         ImGui.Text($"Zoom: {preset.Distance:F2} , FoV: {preset.ZoomFoV + preset.GposeFoV:F2} " + fov);
         ImGui.Text($"H: {MathUtils.RadToDeg(preset.HRotation):F2}\x00B0 , V: {MathUtils.RadToDeg(preset.VRotation):F2}\x00B0");

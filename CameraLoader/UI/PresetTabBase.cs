@@ -12,7 +12,7 @@ public abstract class PresetTabBase
     protected string ErrorMessage = "";
     protected string SearchQuery = "";
 
-    protected int SelectedMode = (int)PresetMode.Character;
+    protected int SelectedMode = (int)PresetMode.CharacterOrientation;
     protected PresetBase SelectedPreset = null;
     protected int PresetIndex = -1;
 

@@ -6,6 +6,7 @@ using CameraLoader.Game;
 using CameraLoader.Utils;
 
 using ImGuiNET;
+using System;
 
 namespace CameraLoader.UI;
 
@@ -108,18 +109,11 @@ public class LightingTab : PresetTabBase
 
         ImGui.Text("Preset Mode:");
         ImGui.BeginGroup();
+        foreach (var mode in Enum.GetValues<PresetMode>())
         {
-            ImGui.RadioButton("Character Position", ref SelectedMode, (int)PresetMode.Character);
+            ImGui.RadioButton(mode.GetDescription(), ref SelectedMode, (int)mode);
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Presets are saved and loaded relative to your character's orientation and position.");
-
-            ImGui.RadioButton("Camera Orientation", ref SelectedMode, (int)PresetMode.CameraOrientation);
-            if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Presets are saved relative to the camera's orientation. This is equivalent to the \"Camera Position\" setting in-game.");
-
-            ImGui.RadioButton("Camera Position (New)", ref SelectedMode, (int)PresetMode.CameraPosition);
-            if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Presets are saved and loaded relative to the camera's orientation and position.");
+                ImGui.SetTooltip(mode.GetTooltip());
         }
         ImGui.EndGroup();
     }
@@ -129,7 +123,7 @@ public class LightingTab : PresetTabBase
         ImGui.TextWrapped(SelectedPreset.Name);
 
         ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.6f, 0.6f, 0.6f, 1f));
-        ImGui.TextWrapped($"Mode: {(PresetMode)SelectedPreset.PositionMode}");  // FIXME: Formatting Error
+        ImGui.TextWrapped($"Mode: {((PresetMode)SelectedPreset.PositionMode).GetDescription()}");
 
         int i = 1;
         foreach (var light in ((LightingPreset)SelectedPreset).Lights)
@@ -140,7 +134,7 @@ public class LightingTab : PresetTabBase
             ImGui.Text($"Light {i++} | Type: {3 - light.Type}");
             ImGui.Text($"Position: {light.RelativePos:F2}");
 
-            if (SelectedPreset.PositionMode == (int)PresetMode.Character)
+            if (SelectedPreset.PositionMode == (int)PresetMode.CharacterOrientation)
             {
                 ImGui.SameLine();
                 ImGui.Text($"({MathUtils.RadToDeg(light.RelativeRot):F2}\x00B0)");

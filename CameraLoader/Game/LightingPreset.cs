@@ -39,11 +39,11 @@ public unsafe class LightingPreset : PresetBase
             DrawObject* lightDrawObject = (DrawObject*)Marshal.ReadIntPtr((nint)eventGPoseController + 0xE0 + (8 * i));
             if (lightDrawObject is null) { continue; }
 
-            var relativeObjectPos = mode == (int)PresetMode.CameraPosition ? _camera->Position : Service.ClientState.LocalPlayer?.Position ?? new(0, 0, 0);
-            var relativeObjectRot = mode == (int)PresetMode.CameraPosition ? _camera->HRotation - 1.5707f : Service.ClientState.LocalPlayer?.Rotation ?? 0f;
+            var relativeObjectPos = mode == (int)PresetMode.CameraOrientation ? _camera->Position : Service.ClientState.LocalPlayer?.Position ?? new(0, 0, 0);
+            var relativeObjectRot = mode == (int)PresetMode.CameraOrientation ? _camera->HRotation - 1.5707f : Service.ClientState.LocalPlayer?.Rotation ?? 0f;
 
             var relativePos = lightDrawObject->Position - relativeObjectPos;
-            if (mode == (int)PresetMode.Character || mode == (int)PresetMode.CameraPosition)
+            if (mode == (int)PresetMode.CharacterOrientation || mode == (int)PresetMode.CameraOrientation)
             {
                 var theta = MathUtils.ConvertToRelative(MathUtils.GetHorizontalRotation(relativePos), relativeObjectRot);
                 this.Lights[i].RelativeRot = theta; // For display only
@@ -75,11 +75,11 @@ public unsafe class LightingPreset : PresetBase
 
             if (lightDrawObject is null) { continue; }
 
-            var relativeObjectPos = PositionMode == (int)PresetMode.CameraPosition ? _camera->Position : Service.ClientState.LocalPlayer?.Position ?? new(0, 0, 0);
-            var relativeObjectRot = PositionMode == (int)PresetMode.CameraPosition ? _camera->HRotation - 1.5707f : Service.ClientState.LocalPlayer?.Rotation ?? 0f;
+            var relativeObjectPos = PositionMode == (int)PresetMode.CameraOrientation ? _camera->Position : Service.ClientState.LocalPlayer?.Position ?? new(0, 0, 0);
+            var relativeObjectRot = PositionMode == (int)PresetMode.CameraOrientation ? _camera->HRotation - 1.5707f : Service.ClientState.LocalPlayer?.Rotation ?? 0f;
 
             var relativePos = Lights[i].RelativePos;
-            if (PositionMode == (int)PresetMode.Character || PositionMode == (int)PresetMode.CameraPosition)
+            if (PositionMode == (int)PresetMode.CharacterOrientation || PositionMode == (int)PresetMode.CameraOrientation)
             {
                 (relativePos.X, relativePos.Z) = MathUtils.RotatePoint2D((relativePos.X, relativePos.Z), relativeObjectRot);
             }
