@@ -33,6 +33,7 @@ public class CameraTab : PresetTabBase
             var preset = new CameraPreset(SelectedMode);
             Service.Config.CameraPresetNames.Add(preset.Name);
             Service.Config.CameraPresets.Add(preset);
+            Service.Config.SortPresetList(Service.Config.CameraPresets, Service.Config.SortingModeCamera);
             Service.Config.Save();
         }
 
@@ -162,6 +163,8 @@ public class CameraTab : PresetTabBase
             {
                 Service.Config.CameraPresetNames.Remove(oldName);
                 Service.Config.CameraPresetNames.Add(newName);
+                Service.Config.SortPresetList(Service.Config.CameraPresets, Service.Config.SortingModeCamera);
+                PresetIndex = Service.Config.CameraPresets.IndexOf((CameraPreset)SelectedPreset);
                 Service.Config.Save();
             }
             else

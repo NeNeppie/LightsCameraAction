@@ -48,6 +48,9 @@ public partial class PluginWindow
         if (ImGui.CollapsingHeader("Height Settings"))
             DrawHeightSettings();
 
+        if (ImGui.CollapsingHeader("Sorting Settings"))
+            DrawSortingSettings();
+
         ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.5f, 0.5f, 0.5f, 1f));
         ImGui.TextWrapped("\nHello there! This is my first plugin, so expect bugs to pop up here and there as I figure things out. " +
                             "Your feedback is greatly appreciated.");
@@ -69,5 +72,41 @@ public partial class PluginWindow
             ImGui.SetTooltip("Number of rows shown when selecting a lighting preset.");
 
         ImGui.Spacing();
+    }
+
+    private static void DrawSortingSettings()
+    {
+        var sortModeCamera = Service.Config.SortingModeCamera;
+        var sortModeLighting = Service.Config.SortingModeLighting;
+
+        ImGui.TextWrapped("Sorting mode when selecting a preset. Default is Creation Date.");
+
+        if (ImGui.BeginCombo("Camera##SortMode", sortModeCamera.GetDescription()))
+        {
+            foreach (var mode in Enum.GetValues<PresetSortingMode>())
+            {
+                if (ImGui.Selectable(mode.GetDescription(), mode == sortModeCamera))
+                {
+                    Service.Config.SortingModeCamera = mode;
+                    Service.Config.SortPresetList(Service.Config.CameraPresets, mode);
+                    Service.Config.Save();
+                }
+            }
+            ImGui.EndCombo();
+        }
+
+        if (ImGui.BeginCombo("Lighting##SortMode", sortModeLighting.GetDescription()))
+        {
+            foreach (var mode in Enum.GetValues<PresetSortingMode>())
+            {
+                if (ImGui.Selectable(mode.GetDescription(), mode == sortModeLighting))
+                {
+                    Service.Config.SortingModeLighting = mode;
+                    Service.Config.SortPresetList(Service.Config.LightingPresets, mode);
+                    Service.Config.Save();
+                }
+            }
+            ImGui.EndCombo();
+        }
     }
 }

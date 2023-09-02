@@ -33,6 +33,7 @@ public class LightingTab : PresetTabBase
             var preset = new LightingPreset(SelectedMode);
             Service.Config.LightingPresetNames.Add(preset.Name);
             Service.Config.LightingPresets.Add(preset);
+            Service.Config.SortPresetList(Service.Config.LightingPresets, Service.Config.SortingModeLighting);
             Service.Config.Save();
         }
 
@@ -169,6 +170,8 @@ public class LightingTab : PresetTabBase
             {
                 Service.Config.LightingPresetNames.Remove(oldName);
                 Service.Config.LightingPresetNames.Add(newName);
+                Service.Config.SortPresetList(Service.Config.LightingPresets, Service.Config.SortingModeLighting);
+                PresetIndex = Service.Config.LightingPresets.IndexOf((LightingPreset)SelectedPreset);
                 Service.Config.Save();
             }
             else

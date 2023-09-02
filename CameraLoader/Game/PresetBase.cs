@@ -16,6 +16,7 @@ public unsafe abstract class PresetBase
 {
     public string Name { get; set; } = "";
     public int PositionMode { get; set; }
+    public DateTime CreationDate { get; set; } = DateTime.Now;
 
     [NonSerialized]
     protected static GameCamera* _camera;
