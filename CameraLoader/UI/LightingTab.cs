@@ -13,7 +13,7 @@ namespace CameraLoader.UI;
 public class LightingTab : PresetTabBase
 {
     private static float SelectionHeight => ImGui.GetFrameHeightWithSpacing() + (ImGui.GetTextLineHeight() + ImGui.GetStyle().ItemSpacing.Y) * Service.Config.RowsVisibleLighting;
-    private static float InfoHeight => ImGui.GetTextLineHeightWithSpacing() * 11f + ImGui.GetStyle().ItemSpacing.Y * 3f + ImGui.GetFrameHeightWithSpacing() * 2f;
+    private static float InfoHeight => ImGui.GetTextLineHeightWithSpacing() * 8f + ImGui.GetStyle().ItemSpacing.Y * 3f + ImGui.GetFrameHeightWithSpacing() * 2f;
 
     public void Draw()
     {
@@ -124,16 +124,21 @@ public class LightingTab : PresetTabBase
         ImGui.TextWrapped(SelectedPreset.Name);
 
         ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.6f, 0.6f, 0.6f, 1f));
+
+        ImGuiUtils.IconText(FontAwesomeIcon.Paste);
+        ImGui.SameLine();
+
         ImGui.TextWrapped($"Mode: {((PresetMode)SelectedPreset.PositionMode).GetDescription()}");
 
-        int i = 1;
         foreach (var light in ((LightingPreset)SelectedPreset).Lights)
         {
             ImGui.Separator();
             if (!light.Active) { ImGui.BeginDisabled(); }
 
-            ImGui.Text($"Light {i++} | Type: {3 - light.Type}");
-            ImGui.Text($"Position: {light.RelativePos:F2}");
+            ImGuiUtils.IconText(FontAwesomeIcon.Expand, tooltip: "Position");
+            ImGui.SameLine();
+
+            ImGui.Text($"X: {light.RelativePos.X:F2},  Y: {light.RelativePos.Y:F2},  Z: {light.RelativePos.Z:F2}");
 
             if (SelectedPreset.PositionMode == (int)PresetMode.CharacterOrientation)
             {
@@ -143,13 +148,18 @@ public class LightingTab : PresetTabBase
 
             var color = light.RGB != Vector3.Zero ? MathUtils.ConvertFloatsTo24BitColor(light.RGB) : Vector3.Zero;
 
-            ImGuiUtils.IconText(FontAwesomeIcon.Circle, ImGuiColors.DPSRed); ImGui.SameLine();
-            ImGui.TextColored(ImGuiColors.DPSRed, $"R: {color.X:F0}, "); ImGui.SameLine();
+            ImGuiUtils.IconText(FontAwesomeIcon.Sun, tooltip: "Light Type");
+            ImGui.SameLine();
 
-            ImGuiUtils.IconText(FontAwesomeIcon.Circle, ImGuiColors.HealerGreen); ImGui.SameLine();
-            ImGui.TextColored(ImGuiColors.HealerGreen, $"G: {color.Y:F0}, "); ImGui.SameLine();
+            ImGui.Text($"{3 - light.Type}  |");
+            ImGui.SameLine();
 
-            ImGuiUtils.IconText(FontAwesomeIcon.Circle, ImGuiColors.TankBlue); ImGui.SameLine();
+            ImGui.TextColored(ImGuiColors.DPSRed, $"R: {color.X:F0}"); ImGui.SameLine(); ImGui.Text("|");
+            ImGui.SameLine();
+
+            ImGui.TextColored(ImGuiColors.HealerGreen, $"G: {color.Y:F0}"); ImGui.SameLine(); ImGui.Text("|");
+            ImGui.SameLine();
+
             ImGui.TextColored(ImGuiColors.TankBlue, $"B: {color.Z:F0}");
 
             if (!light.Active) { ImGui.EndDisabled(); }

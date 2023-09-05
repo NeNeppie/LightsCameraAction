@@ -128,21 +128,33 @@ public class CameraTab : PresetTabBase
     private void DrawPresetInfo()
     {
         var preset = (CameraPreset)SelectedPreset;
-        // FIXME: formatting bug when GposeFoV is 0
-        string fov = preset.GposeFoV > 0 ? $"({preset.ZoomFoV:F2}+{preset.GposeFoV})" : $"({preset.ZoomFoV:F2}{preset.GposeFoV:F2})";
 
         ImGui.TextWrapped(preset.Name);
 
         ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.6f, 0.6f, 0.6f, 1f));
-        ImGui.TextWrapped($"Mode: {((PresetMode)preset.PositionMode).GetDescription()}");
 
-        ImGui.Text($"Zoom: {preset.Distance:F2} , FoV: {preset.ZoomFoV + preset.GposeFoV:F2} " + fov);
-        ImGui.Text($"H: {MathUtils.RadToDeg(preset.HRotation):F2}\x00B0 , V: {MathUtils.RadToDeg(preset.VRotation):F2}\x00B0");
-
-        ImGui.Text($"Pan: {MathUtils.RadToDeg(preset.Pan):F0}\x00B0 , ");
+        ImGuiUtils.IconText(FontAwesomeIcon.Paste);
         ImGui.SameLine();
 
-        ImGui.Text($"Tilt: {MathUtils.RadToDeg(preset.Tilt):F0}\x00B0 , ");
+        ImGui.TextWrapped($"Mode: {((PresetMode)preset.PositionMode).GetDescription()}");
+
+        ImGuiUtils.IconText(FontAwesomeIcon.ExpandAlt);
+        ImGui.SameLine();
+
+        ImGui.Text($"Zoom: {preset.Distance:F2},  FoV: {preset.ZoomFoV + preset.GposeFoV:F2}");
+
+        ImGuiUtils.IconText(FontAwesomeIcon.Expand, tooltip: "Camera Angle");
+        ImGui.SameLine();
+
+        ImGui.Text($"H: {MathUtils.RadToDeg(preset.HRotation):F2}\x00B0,  V: {MathUtils.RadToDeg(preset.VRotation):F2}\x00B0");
+
+        ImGuiUtils.IconText(FontAwesomeIcon.ArrowsUpDownLeftRight);
+        ImGui.SameLine();
+
+        ImGui.Text($"Pan: {MathUtils.RadToDeg(preset.Pan):F0}\x00B0, ");
+        ImGui.SameLine();
+
+        ImGui.Text($"Tilt: {MathUtils.RadToDeg(preset.Tilt):F0}\x00B0, ");
         ImGui.SameLine();
 
         ImGui.Text($"Roll: {MathUtils.RadToDeg(preset.Roll):F0}\x00B0");
