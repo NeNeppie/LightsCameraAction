@@ -1,5 +1,4 @@
 using System;
-using Dalamud.Logging;
 
 using CameraLoader.Game.Structs;
 
@@ -25,7 +24,7 @@ public unsafe abstract class PresetBase
     {
         var cameraManager = (CameraManager*)Service.SigScanner.GetStaticAddressFromSig("4C 8D 35 ?? ?? ?? ?? 85 D2");
         _camera = cameraManager->WorldCamera;
-        PluginLog.Debug($"Pointer to game camera @ 0x{(IntPtr)_camera:X16}");
+        Service.PluginLog.Debug($"Pointer to game camera @ 0x{(IntPtr)_camera:X16}");
     }
 
     public abstract bool Load();
@@ -33,7 +32,7 @@ public unsafe abstract class PresetBase
     public abstract string Rename(string name);
 }
 
-static class PresetModeEx
+internal static class PresetModeEx
 {
     public static string GetDescription(this PresetMode value)
     {

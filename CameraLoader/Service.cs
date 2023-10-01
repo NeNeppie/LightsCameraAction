@@ -1,9 +1,7 @@
 using Dalamud.Game;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Objects;
-using Dalamud.Game.ClientState.Conditions;
 using Dalamud.IoC;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 
 using CameraLoader.Config;
 using CameraLoader.Game;
@@ -12,10 +10,12 @@ namespace CameraLoader;
 
 internal class Service
 {
-    [PluginService] public static ClientState ClientState { get; private set; } = null!;
-    [PluginService] public static ObjectTable ObjectTable { get; private set; } = null!;
-    [PluginService] public static SigScanner SigScanner { get; private set; } = null!;
-    [PluginService] public static Condition Conditions { get; private set; } = null!;
+    [PluginService] public static IClientState ClientState { get; private set; } = null!;
+    [PluginService] public static IObjectTable ObjectTable { get; private set; } = null!;
+    [PluginService] public static ISigScanner SigScanner { get; private set; } = null!;
+    [PluginService] public static ICondition Conditions { get; private set; } = null!;
+    [PluginService] public static IPluginLog PluginLog { get; private set; } = null!;
+    [PluginService] public static IGameInteropProvider GameInteropProvider { get; private set; } = null!;
 
     public static GameFunctions GameFunctions { get; set; } = null!;
     public static GPoseHooking GPoseHooking { get; set; } = null!;

@@ -1,7 +1,6 @@
 using System;
 using Dalamud.Hooking;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
-using FFXIVClientStructs.FFXIV.Client.UI;
 
 namespace CameraLoader.Game;
 
@@ -18,15 +17,15 @@ public class GPoseHooking : IDisposable
 
     public unsafe GPoseHooking()
     {
-        UIModule* uiModule = Framework.Instance()->GetUiModule();
+        var uiModule = Framework.Instance()->GetUiModule();
         var enterGPoseAddress = (nint)uiModule->VTable->EnterGPose;
         var exitGPoseAddress = (nint)uiModule->VTable->ExitGPose;
 
-        _enterGPoseHook = Hook<EnterGPoseDelegate>.FromAddress(enterGPoseAddress, this.EnterGPoseDetour);
-        _exitGPoseHook = Hook<ExitGPoseDelegate>.FromAddress(exitGPoseAddress, this.ExitGPoseDetour);
+        this._enterGPoseHook = Service.GameInteropProvider.HookFromAddress<EnterGPoseDelegate>(enterGPoseAddress, this.EnterGPoseDetour);
+        this._exitGPoseHook = Service.GameInteropProvider.HookFromAddress<ExitGPoseDelegate>(exitGPoseAddress, this.ExitGPoseDetour);
 
-        _enterGPoseHook.Enable();
-        _exitGPoseHook.Enable();
+        this._enterGPoseHook.Enable();
+        this._exitGPoseHook.Enable();
     }
 
     private bool EnterGPoseDetour(IntPtr addr)
@@ -41,7 +40,7 @@ public class GPoseHooking : IDisposable
 
     private void ExitGPoseDetour(IntPtr addr)
     {
-        _exitGPoseHook!.Original.Invoke(addr);
+        this._exitGPoseHook!.Original.Invoke(addr);
         OnGPoseStateChangeEvent.Invoke(false);
     }
 

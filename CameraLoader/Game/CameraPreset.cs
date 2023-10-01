@@ -1,5 +1,3 @@
-using Dalamud.Logging;
-
 using CameraLoader.Utils;
 
 namespace CameraLoader.Game;
@@ -97,7 +95,7 @@ public unsafe class CameraPreset : PresetBase
     {
         if (Service.Config.CameraPresetNames.Contains(name))
         {
-            PluginLog.Information($"Couldn't rename camera preset \"{this.Name}\" to \"{name}\" - Name is taken");
+            Service.PluginLog.Information($"Couldn't rename camera preset \"{this.Name}\" to \"{name}\" - Name is taken");
             return null;
         }
         string oldName = this.Name;

@@ -1,6 +1,5 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
-using Dalamud.Logging;
 
 using CameraLoader.Game.Structs;
 using CameraLoader.Utils;
@@ -96,7 +95,7 @@ public unsafe class LightingPreset : PresetBase
     {
         if (Service.Config.LightingPresetNames.Contains(name))
         {
-            PluginLog.Information($"Couldn't rename lighting preset \"{this.Name}\" to \"{name}\" - Name is taken");
+            Service.PluginLog.Information($"Couldn't rename lighting preset \"{this.Name}\" to \"{name}\" - Name is taken");
             return null;
         }
         string oldName = this.Name;

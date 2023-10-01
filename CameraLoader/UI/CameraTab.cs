@@ -81,7 +81,7 @@ public class CameraTab : PresetTabBase
                 ErrorMessage = "";
                 if (!SelectedPreset.Load())
                 {
-                    PluginLog.Information($"Attempted to load invalid Camera Preset \"{SelectedPreset.Name}\"");
+                    Service.PluginLog.Information($"Attempted to load invalid Camera Preset \"{this.SelectedPreset.Name}\"");
                     ErrorMessage = "Preset is invalid";
                 }
             }

@@ -1,7 +1,7 @@
-﻿using System;
-using Dalamud.Game.Command;
+using System;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 
 using CameraLoader.Attributes;
 using CameraLoader.UI;
@@ -17,7 +17,7 @@ public class CameraLoader : IDalamudPlugin
     private PluginWindow _window;
     public string Name => "Lights, Camera, Action!";
 
-    public CameraLoader(DalamudPluginInterface pluginInterface, CommandManager commands)
+    public CameraLoader(DalamudPluginInterface pluginInterface, ICommandManager commands)
     {
         this._pluginInterface = pluginInterface;
         this._pluginInterface.Create<Service>();

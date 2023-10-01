@@ -28,14 +28,14 @@ public unsafe class GameFunctions
 
     public GameFunctions()
     {
-        SignatureHelper.Initialise(this);
+        Service.GameInteropProvider.InitializeFromAttributes(this);
     }
 
     public void UpdateFalloffDistance(LightObject* obj) => this._updateFalloffDistance!.Invoke(obj, '\0');
 
-    public char AddGPoseLight(EventGPoseController* ptr, uint LightIndex) => _addGPoseLight!.Invoke(ptr, LightIndex);
+    public char AddGPoseLight(EventGPoseController* ptr, uint LightIndex) => this._addGPoseLight!.Invoke(ptr, LightIndex);
 
-    public char ToggleGPoseLight(EventGPoseController* ptr, uint LightIndex) => _toggleGPoseLight!.Invoke(ptr, LightIndex);
+    public char ToggleGPoseLight(EventGPoseController* ptr, uint LightIndex) => this._toggleGPoseLight!.Invoke(ptr, LightIndex);
 
     public void Dispose()
     {
