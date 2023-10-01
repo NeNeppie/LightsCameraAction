@@ -35,7 +35,7 @@ public unsafe class LightingPreset : PresetBase
         {
             this.Lights[i] = new();
 
-            DrawObject* lightDrawObject = (DrawObject*)Marshal.ReadIntPtr((nint)eventGPoseController + 0xE0 + (8 * i));
+            var lightDrawObject = (DrawObject*)Marshal.ReadIntPtr((nint)eventGPoseController + 0xE0 + (8 * i));
             if (lightDrawObject is null) { continue; }
 
             var relativeObjectPos = mode == (int)PresetMode.CameraOrientation ? _camera->Position : Service.ClientState.LocalPlayer?.Position ?? new(0, 0, 0);
@@ -64,9 +64,9 @@ public unsafe class LightingPreset : PresetBase
         var eventGPoseController = &eventFramework->EventSceneModule.EventGPoseController;
         for (int i = 0; i < 3; i++)
         {
-            DrawObject* lightDrawObject = (DrawObject*)Marshal.ReadIntPtr((nint)eventGPoseController + 0xE0 + (8 * i));
-            if (Lights[i].Active && lightDrawObject is null ||
-                !Lights[i].Active && lightDrawObject is not null)
+            var lightDrawObject = (DrawObject*)Marshal.ReadIntPtr((nint)eventGPoseController + 0xE0 + (8 * i));
+            if ((this.Lights[i].Active && lightDrawObject is null) ||
+                (!this.Lights[i].Active && lightDrawObject is not null))
             {
                 Service.GameFunctions.ToggleGPoseLight(eventGPoseController, (uint)i);
                 lightDrawObject = (DrawObject*)Marshal.ReadIntPtr((nint)eventGPoseController + 0xE0 + (8 * i));
@@ -74,18 +74,18 @@ public unsafe class LightingPreset : PresetBase
 
             if (lightDrawObject is null) { continue; }
 
-            var relativeObjectPos = PositionMode == (int)PresetMode.CameraOrientation ? _camera->Position : Service.ClientState.LocalPlayer?.Position ?? new(0, 0, 0);
-            var relativeObjectRot = PositionMode == (int)PresetMode.CameraOrientation ? _camera->HRotation - 1.5707f : Service.ClientState.LocalPlayer?.Rotation ?? 0f;
+            var relativeObjectPos = this.PositionMode == (int)PresetMode.CameraOrientation ? _camera->Position : Service.ClientState.LocalPlayer?.Position ?? new(0, 0, 0);
+            var relativeObjectRot = this.PositionMode == (int)PresetMode.CameraOrientation ? _camera->HRotation - 1.5707f : Service.ClientState.LocalPlayer?.Rotation ?? 0f;
 
-            var relativePos = Lights[i].RelativePos;
-            if (PositionMode == (int)PresetMode.CharacterOrientation || PositionMode == (int)PresetMode.CameraOrientation)
+            var relativePos = this.Lights[i].RelativePos;
+            if (this.PositionMode is ((int)PresetMode.CharacterOrientation) or ((int)PresetMode.CameraOrientation))
             {
                 (relativePos.X, relativePos.Z) = MathUtils.RotatePoint2D((relativePos.X, relativePos.Z), relativeObjectRot);
             }
 
             lightDrawObject->Position = relativePos + relativeObjectPos;
-            lightDrawObject->LightObject->RGB = Lights[i].RGB;
-            lightDrawObject->LightObject->Type = Lights[i].Type;
+            lightDrawObject->LightObject->RGB = this.Lights[i].RGB;
+            lightDrawObject->LightObject->Type = this.Lights[i].Type;
             Service.GameFunctions.UpdateFalloffDistance(lightDrawObject->LightObject);
         }
         return true;
@@ -98,7 +98,7 @@ public unsafe class LightingPreset : PresetBase
             Service.PluginLog.Information($"Couldn't rename lighting preset \"{this.Name}\" to \"{name}\" - Name is taken");
             return null;
         }
-        string oldName = this.Name;
+        var oldName = this.Name;
         this.Name = name;
         return oldName;
     }

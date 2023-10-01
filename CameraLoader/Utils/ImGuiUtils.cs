@@ -23,7 +23,7 @@ public static class ImGuiUtils
         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, color * new Vector4(1f, 1f, 1f, 1.2f));
         ImGui.PushStyleColor(ImGuiCol.ButtonActive, color * new Vector4(1f, 1f, 1f, 1.5f));
 
-        bool res = small ? ImGui.SmallButton(label) : ImGui.Button(label, size);
+        var res = small ? ImGui.SmallButton(label) : ImGui.Button(label, size);
         if (tooltip != null && ImGui.IsItemHovered())
         {
             ImGui.SetTooltip(tooltip);
@@ -39,7 +39,7 @@ public static class ImGuiUtils
         var label = icon.ToIconString();
 
         ImGui.PushFont(UiBuilder.IconFont);
-        bool res = small ? ImGui.SmallButton(label) : ImGui.Button(label, size);
+        var res = small ? ImGui.SmallButton(label) : ImGui.Button(label, size);
         ImGui.PopFont();
 
         if (tooltip != null && ImGui.IsItemHovered())
@@ -56,7 +56,7 @@ public static class ImGuiUtils
         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, color * new Vector4(1f, 1f, 1f, 1.2f));
         ImGui.PushStyleColor(ImGuiCol.ButtonActive, color * new Vector4(1f, 1f, 1f, 1.5f));
 
-        bool res = IconButton(icon, size, tooltip, small);
+        var res = IconButton(icon, size, tooltip, small);
 
         ImGui.PopStyleColor(3);
         return res;

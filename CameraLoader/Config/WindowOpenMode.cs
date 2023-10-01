@@ -7,7 +7,7 @@ public enum WindowOpenMode
     OnStartup
 }
 
-static class WindowOpenModeEx
+internal static class WindowOpenModeEx
 {
     public static string GetDescription(this WindowOpenMode value)
     {

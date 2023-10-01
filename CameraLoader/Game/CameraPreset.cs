@@ -20,7 +20,7 @@ public unsafe class CameraPreset : PresetBase
         for (int i = 1; i <= Service.Config.CameraPresets.Count + 1; i++)
         {
             this.Name = $"Preset #{i}";
-            if (!Service.Config.CameraPresetNames.Contains(Name)) { break; }
+            if (!Service.Config.CameraPresetNames.Contains(this.Name)) { break; }
         }
 
         float cameraRot = _camera->HRotation;
@@ -28,7 +28,7 @@ public unsafe class CameraPreset : PresetBase
 
         if (mode == (int)PresetMode.CharacterOrientation)
         {
-            float playerRot = Service.ClientState.LocalPlayer?.Rotation ?? 0f;
+            var playerRot = Service.ClientState.LocalPlayer?.Rotation ?? 0f;
             relativeRot = MathUtils.ConvertToRelative(cameraRot, playerRot);
         }
 
@@ -49,16 +49,16 @@ public unsafe class CameraPreset : PresetBase
     public bool IsValid()
     {
         // Doesn't go above Max, but Max can be externally modified
-        if (Distance > 20f)
+        if (this.Distance > 20f)
             return false;
 
         // Zoom FoV carries outside of gpose! Negative values flip the screen, High positive values are effectively a zoom hack
         // Gpose FoV resets when exiting gpose, but we don't want people suddenly entering gpose during a fight.
-        if (ZoomFoV < 0.69f || ZoomFoV > 0.78f || GposeFoV < -0.5f || GposeFoV > 0.5f)
+        if (this.ZoomFoV < 0.69f || this.ZoomFoV > 0.78f || this.GposeFoV < -0.5f || this.GposeFoV > 0.5f)
             return false;
 
         // Both reset when exiting gpose, but can still be modified beyond the limits the game sets
-        if (Pan < -0.873f || Pan > 0.873f || Tilt < -0.647f || Tilt > 0.342f)
+        if (this.Pan < -0.873f || this.Pan > 0.873f || this.Tilt < -0.647f || this.Tilt > 0.342f)
             return false;
 
         return true;
@@ -68,25 +68,25 @@ public unsafe class CameraPreset : PresetBase
     {
         if (!this.IsValid()) { return false; }
 
-        float hRotation = HRotation;
-        if (PositionMode == (int)PresetMode.CharacterOrientation)
+        float hRotation = this.HRotation;
+        if (this.PositionMode == (int)PresetMode.CharacterOrientation)
         {
-            float playerRot = Service.ClientState.LocalPlayer?.Rotation ?? 0f;
-            hRotation = MathUtils.ConvertFromRelative(HRotation, playerRot);
+            var playerRot = Service.ClientState.LocalPlayer?.Rotation ?? 0f;
+            hRotation = MathUtils.ConvertFromRelative(this.HRotation, playerRot);
         }
 
         // First Person Mode
         if (_camera->Mode == 0) { hRotation = MathUtils.AddPiRad(hRotation); }
 
-        _camera->Mode = (Distance == 0) ? 0 : 1;
-        _camera->Distance = (Distance == 0) ? 1.5f : Distance;
+        _camera->Mode = (this.Distance == 0) ? 0 : 1;
+        _camera->Distance = (this.Distance == 0) ? 1.5f : this.Distance;
         _camera->HRotation = hRotation;
-        _camera->VRotation = VRotation;
-        _camera->FoV = ZoomFoV;
-        _camera->AddedFoV = GposeFoV;
-        _camera->Pan = Pan;
-        _camera->Tilt = Tilt;
-        _camera->Roll = Roll;
+        _camera->VRotation = this.VRotation;
+        _camera->FoV = this.ZoomFoV;
+        _camera->AddedFoV = this.GposeFoV;
+        _camera->Pan = this.Pan;
+        _camera->Tilt = this.Tilt;
+        _camera->Roll = this.Roll;
 
         return true;
     }

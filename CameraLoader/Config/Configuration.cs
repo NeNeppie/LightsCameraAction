@@ -33,13 +33,13 @@ public class Configuration : IPluginConfiguration
     public void Initialize(DalamudPluginInterface pi)
     {
         this._pluginInterface = pi;
-        foreach (var preset in CameraPresets)
+        foreach (var preset in this.CameraPresets)
         {
-            CameraPresetNames.Add(preset.Name);
+            this.CameraPresetNames.Add(preset.Name);
         }
-        foreach (var preset in LightingPresets)
+        foreach (var preset in this.LightingPresets)
         {
-            LightingPresetNames.Add(preset.Name);
+            this.LightingPresetNames.Add(preset.Name);
         }
     }
 

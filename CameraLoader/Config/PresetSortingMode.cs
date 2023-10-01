@@ -7,7 +7,7 @@ public enum PresetSortingMode
     NameDescend,
 }
 
-static class PresetSortingModeEx
+internal static class PresetSortingModeEx
 {
     public static string GetDescription(this PresetSortingMode value)
     {

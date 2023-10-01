@@ -1,10 +1,9 @@
-using System.Numerics;
+﻿using System.Numerics;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
+using ImGuiNET;
 
 using CameraLoader.Config;
-
-using ImGuiNET;
 
 namespace CameraLoader.UI;
 
@@ -15,31 +14,31 @@ public partial class PluginWindow : Window
 
     public PluginWindow() : base("Lights, Camera, Action!")
     {
-        IsOpen = false;
-        Size = new Vector2(250f, 355f);
-        SizeConstraints = new WindowSizeConstraints
+        this.IsOpen = false;
+        this.Size = new Vector2(250f, 355f);
+        this.SizeConstraints = new WindowSizeConstraints
         {
             MaximumSize = new Vector2(1500f, -1),
             MinimumSize = new Vector2(240f, -1)
         };
-        SizeCondition = ImGuiCond.FirstUseEver;
+        this.SizeCondition = ImGuiCond.FirstUseEver;
 
-        Service.GPoseHooking.OnGPoseStateChangeEvent += WindowBehaviourCheck;
+        Service.GPoseHooking.OnGPoseStateChangeEvent += this.WindowBehaviourCheck;
 
-        LightingTab = new LightingTab();
-        CameraTab = new CameraTab();
+        this.LightingTab = new LightingTab();
+        this.CameraTab = new CameraTab();
     }
 
     public override void Draw()
     {
-        if (!IsOpen) { return; }
+        if (!this.IsOpen) { return; }
 
         this.Flags = GetWindowFlags();
 
         if (ImGui.BeginTabBar("##TabBar", ImGuiTabBarFlags.None))
         {
-            CameraTab.Draw();
-            LightingTab.Draw();
+            this.CameraTab.Draw();
+            this.LightingTab.Draw();
             DrawSettingsTab();
 #if DEBUG
             //DrawDebugTab();
@@ -48,7 +47,7 @@ public partial class PluginWindow : Window
         }
 
         var size = ImGui.GetWindowSize();
-        ImGui.SetWindowSize(size with { Y = ImGui.GetCursorPosY() + 5f * ImGuiHelpers.GlobalScale });
+        ImGui.SetWindowSize(size with { Y = ImGui.GetCursorPosY() + (5f * ImGuiHelpers.GlobalScale) });
     }
 
     private static ImGuiWindowFlags GetWindowFlags()

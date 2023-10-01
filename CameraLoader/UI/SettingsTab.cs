@@ -1,9 +1,8 @@
 using System;
 using System.Numerics;
+using ImGuiNET;
 
 using CameraLoader.Config;
-
-using ImGuiNET;
 
 namespace CameraLoader.UI;
 
@@ -11,8 +10,7 @@ public partial class PluginWindow
 {
     public static void DrawSettingsTab()
     {
-        bool res = ImGui.BeginTabItem("Settings##SettingsTab");
-        if (!res) { return; }
+        if (!ImGui.BeginTabItem("Settings##SettingsTab")) { return; }
 
         ImGui.Spacing();
 

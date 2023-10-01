@@ -1,8 +1,7 @@
 using System.Numerics;
+using ImGuiNET;
 
 using CameraLoader.Game;
-
-using ImGuiNET;
 
 namespace CameraLoader.UI;
 
@@ -18,12 +17,12 @@ public abstract class PresetTabBase
 
     protected bool IsInGPose()
     {
-        bool isInCameraMode = Service.Conditions[Dalamud.Game.ClientState.Conditions.ConditionFlag.WatchingCutscene];
-        bool gposeActorExists = Service.ObjectTable[201] != null;
+        var isInCameraMode = Service.Conditions[Dalamud.Game.ClientState.Conditions.ConditionFlag.WatchingCutscene];
+        var gposeActorExists = Service.ObjectTable[201] != null;
         if (!(isInCameraMode && gposeActorExists))
         {
-            PresetIndex = -1;
-            SelectedPreset = null;
+            this.PresetIndex = -1;
+            this.SelectedPreset = null;
 
             ImGui.TextWrapped("Unavailable outside of Group Pose");
 
@@ -39,7 +38,7 @@ public abstract class PresetTabBase
 
     protected void DrawErrorMessage()
     {
-        if (ErrorMessage != "")
+        if (this.ErrorMessage != "")
         {
             ImGui.TextColored(new Vector4(1, 0, 0, 1), ErrorMessage);
         }
