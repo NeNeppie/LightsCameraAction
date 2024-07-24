@@ -28,11 +28,9 @@ public class Configuration : IPluginConfiguration
     public HashSet<string> CameraPresetNames = new();
     [NonSerialized]
     public HashSet<string> LightingPresetNames = new();
-    private DalamudPluginInterface _pluginInterface;
 
-    public void Initialize(DalamudPluginInterface pi)
+    public void Initialize()
     {
-        this._pluginInterface = pi;
         foreach (var preset in this.CameraPresets)
         {
             this.CameraPresetNames.Add(preset.Name);
@@ -45,7 +43,7 @@ public class Configuration : IPluginConfiguration
 
     public void Save()
     {
-        this._pluginInterface.SavePluginConfig(this);
+        Service.PluginInterface.SavePluginConfig(this);
     }
 
     public void SortPresetList<T>(List<T> list, PresetSortingMode mode) where T : PresetBase

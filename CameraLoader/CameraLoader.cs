@@ -3,41 +3,37 @@ using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 
-using CameraLoader.Attributes;
 using CameraLoader.UI;
 
 namespace CameraLoader;
 
 public class CameraLoader : IDalamudPlugin
 {
-    private readonly DalamudPluginInterface _pluginInterface;
-    private readonly PluginCommandManager<CameraLoader> _commandManager;
     private readonly WindowSystem _windowSystem;
 
     private PluginWindow _window;
-    public string Name => "Lights, Camera, Action!";
+    public static string Name => "Lights, Camera, Action!";
 
-    public CameraLoader(DalamudPluginInterface pluginInterface, ICommandManager commands)
+    public CameraLoader(IDalamudPluginInterface pluginInterface, ICommandManager commands)
     {
-        this._pluginInterface = pluginInterface;
-        this._pluginInterface.Create<Service>();
-        bool windowState = Service.Initialize(this._pluginInterface);
+        pluginInterface.Create<Service>();
+        bool windowState = Service.Initialize();
 
-        this._commandManager = new PluginCommandManager<CameraLoader>(this, commands);
-
-        this._windowSystem = new WindowSystem(this.Name);
-        this._window = this._pluginInterface.Create<PluginWindow>();
+        this._windowSystem = new WindowSystem(Name);
+        this._window = Service.PluginInterface.Create<PluginWindow>();
         this._window.IsOpen = windowState;
         this._windowSystem.AddWindow(_window);
 
-        this._pluginInterface.UiBuilder.DisableGposeUiHide = true;
-        this._pluginInterface.UiBuilder.Draw += this._windowSystem.Draw;
+        Service.CommandManager.AddHandler("/lca", new Dalamud.Game.Command.CommandInfo(OnCommand)
+        {
+            HelpMessage = "Toggles LCAction's main window"
+        });
+
+        Service.PluginInterface.UiBuilder.Draw += this._windowSystem.Draw;
+        Service.PluginInterface.UiBuilder.DisableGposeUiHide = true;
     }
 
-    [Command("/lcaction")]
-    [Aliases("/lca")]
-    [HelpMessage("Toggles LCAction's main window")]
-    public unsafe void OnCommand(string command, string args)
+    private void OnCommand(string command, string args)
     {
         this._window.Toggle();
     }
@@ -47,9 +43,8 @@ public class CameraLoader : IDalamudPlugin
     {
         if (!disposing) return;
 
-        this._commandManager.Dispose();
-        this._pluginInterface.SavePluginConfig(Service.Config);
-        this._pluginInterface.UiBuilder.Draw -= this._window.Draw;
+        Service.PluginInterface.SavePluginConfig(Service.Config);
+        Service.PluginInterface.UiBuilder.Draw -= this._window.Draw;
     }
 
     public void Dispose()

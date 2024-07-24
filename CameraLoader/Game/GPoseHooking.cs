@@ -17,24 +17,21 @@ public class GPoseHooking : IDisposable
 
     public unsafe GPoseHooking()
     {
-        var uiModule = Framework.Instance()->GetUiModule();
-        var enterGPoseAddress = (nint)uiModule->VTable->EnterGPose;
-        var exitGPoseAddress = (nint)uiModule->VTable->ExitGPose;
+        var uiModule = Framework.Instance()->UIModule;
+        var enterGPoseAddress = (nint)uiModule->VirtualTable->EnterGPose;
+        var exitGPoseAddress = (nint)uiModule->VirtualTable->ExitGPose;
 
         this._enterGPoseHook = Service.GameInteropProvider.HookFromAddress<EnterGPoseDelegate>(enterGPoseAddress, this.EnterGPoseDetour);
-        this._exitGPoseHook = Service.GameInteropProvider.HookFromAddress<ExitGPoseDelegate>(exitGPoseAddress, this.ExitGPoseDetour);
-
         this._enterGPoseHook.Enable();
+
+        this._exitGPoseHook = Service.GameInteropProvider.HookFromAddress<ExitGPoseDelegate>(exitGPoseAddress, this.ExitGPoseDetour);
         this._exitGPoseHook.Enable();
     }
 
     private bool EnterGPoseDetour(IntPtr addr)
     {
-        var entered = _enterGPoseHook!.Original.Invoke(addr);
-        if (entered)
-        {
-            OnGPoseStateChangeEvent.Invoke(true);
-        }
+        var entered = this._enterGPoseHook!.Original.Invoke(addr);
+        OnGPoseStateChangeEvent.Invoke(entered);
         return entered;
     }
 
@@ -46,11 +43,11 @@ public class GPoseHooking : IDisposable
 
     public void Dispose()
     {
-        _enterGPoseHook.Disable();
-        _exitGPoseHook.Disable();
+        this._enterGPoseHook.Disable();
+        this._exitGPoseHook.Disable();
 
-        _enterGPoseHook.Dispose();
-        _exitGPoseHook.Dispose();
+        this._enterGPoseHook.Dispose();
+        this._exitGPoseHook.Dispose();
 
         OnGPoseStateChangeEvent = null;
     }
