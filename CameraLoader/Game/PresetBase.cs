@@ -1,4 +1,5 @@
 using System;
+using FFXIVClientStructs.FFXIV.Client.Game.Control;
 
 using CameraLoader.Game.Structs;
 
@@ -22,9 +23,8 @@ public unsafe abstract class PresetBase
 
     static PresetBase()
     {
-        var cameraManager = (CameraManager*)Service.SigScanner.GetStaticAddressFromSig("4C 8D 35 ?? ?? ?? ?? 85 D2");
-        _camera = cameraManager->WorldCamera;
-        Service.PluginLog.Debug($"Pointer to game camera @ 0x{(IntPtr)_camera:X16}");
+        CameraManager* cameraManager = CameraManager.Instance();
+        _camera = (GameCamera*)cameraManager->Camera;
     }
 
     public abstract bool Load();
