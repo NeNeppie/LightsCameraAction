@@ -35,7 +35,7 @@ public unsafe class LightingPreset : PresetBase
         {
             this.Lights[i] = new();
 
-            var lightDrawObject = (DrawObject*)Marshal.ReadIntPtr((nint)eventGPoseController + 0xE0 + (8 * i));
+            var lightDrawObject = (LightObject*)Marshal.ReadIntPtr((nint)eventGPoseController + 0xE0 + (8 * i));
             if (lightDrawObject is null) { continue; }
 
             var relativeObjectPos = mode == (int)PresetMode.CameraOrientation ? _camera->Position : Service.ClientState.LocalPlayer?.Position ?? new(0, 0, 0);
@@ -51,25 +51,24 @@ public unsafe class LightingPreset : PresetBase
 
             this.Lights[i].Active = true;
             this.Lights[i].RelativePos = relativePos;
-            this.Lights[i].RGB = lightDrawObject->LightObject->RGB;
-            this.Lights[i].Type = lightDrawObject->LightObject->Type;
+            this.Lights[i].RGB = lightDrawObject->LightRenderObject->RGB;
+            this.Lights[i].Type = lightDrawObject->LightRenderObject->Type;
         }
         this.PositionMode = mode;
     }
 
-    // TODO: Reflect changes in the UI.
     public override bool Load()
     {
         var eventFramework = FFXIVClientStructs.FFXIV.Client.Game.Event.EventFramework.Instance();
         var eventGPoseController = &eventFramework->EventSceneModule.EventGPoseController;
         for (int i = 0; i < 3; i++)
         {
-            var lightDrawObject = (DrawObject*)Marshal.ReadIntPtr((nint)eventGPoseController + 0xE0 + (8 * i));
+            var lightDrawObject = (LightObject*)Marshal.ReadIntPtr((nint)eventGPoseController + 0xE0 + (8 * i));
             if ((this.Lights[i].Active && lightDrawObject is null) ||
                 (!this.Lights[i].Active && lightDrawObject is not null))
             {
-                Service.GameFunctions.ToggleGPoseLight(eventGPoseController, (uint)i);
-                lightDrawObject = (DrawObject*)Marshal.ReadIntPtr((nint)eventGPoseController + 0xE0 + (8 * i));
+                Service.GameFunctions.ToggleLight(eventGPoseController, (uint)i);
+                lightDrawObject = (LightObject*)Marshal.ReadIntPtr((nint)eventGPoseController + 0xE0 + (8 * i));
             }
 
             if (lightDrawObject is null) { continue; }
@@ -84,9 +83,9 @@ public unsafe class LightingPreset : PresetBase
             }
 
             lightDrawObject->Position = relativePos + relativeObjectPos;
-            lightDrawObject->LightObject->RGB = this.Lights[i].RGB;
-            lightDrawObject->LightObject->Type = this.Lights[i].Type;
-            Service.GameFunctions.UpdateFalloffDistance(lightDrawObject->LightObject);
+            lightDrawObject->LightRenderObject->RGB = this.Lights[i].RGB;
+            lightDrawObject->LightRenderObject->Type = this.Lights[i].Type;
+            Service.GameFunctions.UpdateLightObject(lightDrawObject);
         }
         return true;
     }

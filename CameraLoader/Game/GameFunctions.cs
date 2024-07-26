@@ -7,35 +7,50 @@ namespace CameraLoader.Game;
 
 public unsafe class GameFunctions
 {
-    //[Siganure("E8 ?? ?? ?? ?? EB 28 83 FF 03")] EventGPoseController.LightRGB
-    //[Signature("E8 ?? ?? ?? ?? EB 28 83 FF 03")] EventGPoseController.UnkSetLightSettings(nint, uint, float, float, float, int?)
-    //[Signature("E8 ?? ?? ?? ?? 84 C0 75 0C C6 86")] Unknown Update UI function (specifically for CameraSetting agent?)
-
-    // LightObject.UpdateFalloffDistance(char unk)
-    private delegate void UpdateFalloffDistanceDelegate(LightObject* obj, char unk);
-    [Signature("48 89 5C 24 ?? 56 48 83 EC 50 48 8B D9")]  // ffxiv_dx11.exe+370670 | 140370670
-    private readonly UpdateFalloffDistanceDelegate _updateFalloffDistance = null;
-
-    // EventGPoseController.AddGPoseLight(nint, uint)
-    private delegate char AddGPoseLightDelegate(EventGPoseController* EventGPoseController, uint LightIndex);
-    [Signature("E8 ?? ?? ?? ?? 4C 39 26 0F 84")]  // ffxiv_dx11.exe+7EDA60 | 1407EDA60
-    private readonly AddGPoseLightDelegate _addGPoseLight = null;
-
-    // EventGPoseController.ToggleGPoseLight(nint, uint)
-    private delegate char ToggleGPoseLightDelegate(EventGPoseController* EventGPoseController, uint LightIndex);
+    // EventGPoseController.ToggleGPoseLight(uint index)
+    private delegate char ToggleLightDelegate(EventGPoseController* EventGPoseController, uint index);
     [Signature("48 83 EC 28 4C 8B C1 83 FA 03")]
-    private readonly ToggleGPoseLightDelegate _toggleGPoseLight = null;
+    private readonly ToggleLightDelegate _toggleLight = null!;
+
+    // EventGpPoseController.SetLightType(uint index, Vector3 RGB, int type)
+    // private delegate void SetLightTypeDelegate(EventGPoseController* EventGPoseController, uint index, Vector3 RGB, int type);
+    // [Signature("83 FA 03 0F 83 ?? ?? ?? ?? F3 0F 11 5C 24 ??")]
+    // private readonly SetLightTypeDelegate _setLightType = null;
+
+    // LightObject.UpdateMaterials()
+    private delegate void LightUpdateMaterialsDelegate(LightObject* obj);
+    [Signature("40 53 48 83 EC 20 0F B6 81 ?? ?? ?? ?? 48 8B D9 A8 04 75 45 0C 04 B2 05")]
+    private readonly LightUpdateMaterialsDelegate _lightUpdateMaterials = null!;
+
+    // LightObject.UpdateCulling()
+    private delegate void LightUpdateCullingDelegate(LightObject* obj);
+    [Signature("48 89 5C 24 ?? 57 48 83 EC 40 48 8B B9 ?? ?? ?? ??")]
+    private readonly LightUpdateCullingDelegate _lightUpdateCulling = null!;
+
+    // LightRenderObject.UpdateTypeRange(char unk) "48 89 5C 24 ?? 56 48 83 EC 50 48 8B D9"
+    private delegate void LightUpdateRangeDelegate(LightRenderObject* obj, char unk);
+    [Signature("E8 ?? ?? ?? ?? 48 8D 8E ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 48 8B 96 ?? ?? ?? ??")]
+    private readonly LightUpdateRangeDelegate _lightUpdateRange = null!;
 
     public GameFunctions()
     {
         Service.GameInteropProvider.InitializeFromAttributes(this);
     }
 
-    public void UpdateFalloffDistance(LightObject* obj) => this._updateFalloffDistance!.Invoke(obj, '\0');
+    public char ToggleLight(EventGPoseController* ptr, uint index) => this._toggleLight.Invoke(ptr, index);
 
-    public char AddGPoseLight(EventGPoseController* ptr, uint LightIndex) => this._addGPoseLight!.Invoke(ptr, LightIndex);
-
-    public char ToggleGPoseLight(EventGPoseController* ptr, uint LightIndex) => this._toggleGPoseLight!.Invoke(ptr, LightIndex);
+    // public void SetLightType(EventGPoseController* ptr, uint index, Vector3 RGB, int type) => this._setLightType.Invoke(ptr, index, RGB, type);
+    
+    public void UpdateLightObject(LightObject* obj)
+    {
+        if (obj != null)
+        {
+            // I can't tell whether these first two make a difference, but better safe than sorry. Credit to Ktisis.
+            this._lightUpdateCulling.Invoke(obj);
+            this._lightUpdateMaterials.Invoke(obj);
+            this._lightUpdateRange.Invoke(obj->LightRenderObject, '\0');
+        }
+    }
 
     public void Dispose()
     {
