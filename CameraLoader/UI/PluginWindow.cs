@@ -4,13 +4,14 @@ using Dalamud.Interface.Windowing;
 using ImGuiNET;
 
 using CameraLoader.Config;
+using CameraLoader.Game;
 
 namespace CameraLoader.UI;
 
 public partial class PluginWindow : Window
 {
-    private readonly CameraTab CameraTab;
-    private readonly LightingTab LightingTab;
+    private readonly PresetTab _cameraTab;
+    private readonly PresetTab _lightingTab;
 
     public PluginWindow() : base("Lights, Camera, Action!")
     {
@@ -25,8 +26,8 @@ public partial class PluginWindow : Window
 
         Service.GPoseHooking.OnGPoseStateChangeEvent += this.WindowBehaviourCheck;
 
-        this.LightingTab = new LightingTab();
-        this.CameraTab = new CameraTab();
+        this._cameraTab = new PresetTab(typeof(CameraPreset));
+        this._lightingTab = new PresetTab(typeof(LightingPreset));
     }
 
     public override void Draw()
@@ -37,12 +38,11 @@ public partial class PluginWindow : Window
 
         if (ImGui.BeginTabBar("##TabBar", ImGuiTabBarFlags.None))
         {
-            this.CameraTab.Draw();
-            this.LightingTab.Draw();
+            this._cameraTab.Draw(ImGui.GetFrameHeightWithSpacing() + (ImGui.GetTextLineHeightWithSpacing() * Service.Config.RowsVisibleCamera),
+                (ImGui.GetTextLineHeightWithSpacing() * 5f) + (ImGui.GetFrameHeightWithSpacing() * 2f));
+            this._lightingTab.Draw(ImGui.GetFrameHeightWithSpacing() + (ImGui.GetTextLineHeightWithSpacing() * Service.Config.RowsVisibleLighting),
+                (ImGui.GetTextLineHeightWithSpacing() * 8f) + ((ImGui.GetFrameHeightWithSpacing() + ImGui.GetStyle().ItemSpacing.Y) * 3f));
             DrawSettingsTab();
-#if DEBUG
-            //DrawDebugTab();
-#endif
             ImGui.EndTabBar();
         }
 

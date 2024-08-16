@@ -20,15 +20,8 @@ public unsafe class LightingPreset : PresetBase
     public LightInfo[] Lights = new LightInfo[3];
 
     public LightingPreset() { }
-    public LightingPreset(int mode = 0)
+    public LightingPreset(string name, int mode = 0)
     {
-        this.Name = "";
-        for (int i = 1; i <= Service.Config.LightingPresets.Count + 1; i++)
-        {
-            this.Name = $"Preset #{i}";
-            if (!Service.Config.LightingPresetNames.Contains(Name)) { break; }
-        }
-
         var eventFramework = FFXIVClientStructs.FFXIV.Client.Game.Event.EventFramework.Instance();
         var eventGPoseController = &eventFramework->EventSceneModule.EventGPoseController;
         for (int i = 0; i < 3; i++)
@@ -54,6 +47,7 @@ public unsafe class LightingPreset : PresetBase
             this.Lights[i].RGB = lightDrawObject->LightRenderObject->RGB;
             this.Lights[i].Type = lightDrawObject->LightRenderObject->Type;
         }
+        this.Name = name;
         this.PositionMode = mode;
     }
 
@@ -88,17 +82,5 @@ public unsafe class LightingPreset : PresetBase
             Service.GameFunctions.UpdateLightObject(lightDrawObject);
         }
         return true;
-    }
-
-    public override string Rename(string name)
-    {
-        if (Service.Config.LightingPresetNames.Contains(name))
-        {
-            Service.PluginLog.Information($"Couldn't rename lighting preset \"{this.Name}\" to \"{name}\" - Name is taken");
-            return null;
-        }
-        var oldName = this.Name;
-        this.Name = name;
-        return oldName;
     }
 }

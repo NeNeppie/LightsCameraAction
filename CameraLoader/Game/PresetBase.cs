@@ -28,8 +28,6 @@ public unsafe abstract class PresetBase
     }
 
     public abstract bool Load();
-
-    public abstract string Rename(string name);
 }
 
 internal static class PresetModeEx

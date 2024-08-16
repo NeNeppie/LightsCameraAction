@@ -14,15 +14,8 @@ public unsafe class CameraPreset : PresetBase
     public float Roll { get; set; }
 
     public CameraPreset() { }
-    public CameraPreset(int mode = 0)
+    public CameraPreset(string name, int mode = 0)
     {
-        this.Name = "";
-        for (int i = 1; i <= Service.Config.CameraPresets.Count + 1; i++)
-        {
-            this.Name = $"Preset #{i}";
-            if (!Service.Config.CameraPresetNames.Contains(this.Name)) { break; }
-        }
-
         float cameraRot = _camera->HRotation;
         float relativeRot = cameraRot;
 
@@ -35,6 +28,7 @@ public unsafe class CameraPreset : PresetBase
         // First Person Mode
         if (_camera->Mode == 0) { relativeRot = MathUtils.SubPiRad(relativeRot); }
 
+        this.Name = name;
         this.PositionMode = mode;
         this.Distance = (_camera->Mode == 0) ? 0f : _camera->Distance;
         this.HRotation = relativeRot;
@@ -89,17 +83,5 @@ public unsafe class CameraPreset : PresetBase
         _camera->Roll = this.Roll;
 
         return true;
-    }
-
-    public override string Rename(string name)
-    {
-        if (Service.Config.CameraPresetNames.Contains(name))
-        {
-            Service.PluginLog.Information($"Couldn't rename camera preset \"{this.Name}\" to \"{name}\" - Name is taken");
-            return null;
-        }
-        string oldName = this.Name;
-        this.Name = name;
-        return oldName;
     }
 }
