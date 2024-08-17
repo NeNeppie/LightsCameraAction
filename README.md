@@ -2,33 +2,21 @@
 
 Lights, Camera, Action! or LCAction, lets you save unlimited camera & lighting configurations/presets in Group Pose at a time, vastly improving over the vanilla feature which lets you save only one of each. This makes taking quality screenshots easier and more consistent.
 
-For obvious reasons, you need to be in Group Pose to use the plugin.
+For obvious reasons, the plugin's main features are only available while in Group Pose.
 
 ## Installation & Useage
 
 In-game, open the Dalamud plugin installer by typing `/xlplugins` and look for the plugin there. Note that for the time being you must opt-in to testing builds to install the plugin. To do this, type `/xlsettings` and navigate to the Experimental tab.
 
-Once you have the plugin installed, simply type `/lcaction`, or `/lca` for short, to open up the plugin menu. You may configure the plugin to automatically open whenever you enter GPose, or upon startup, via the Settings tab.
+You can type `/lca` to bring up the plugin window. You can also configure the plugin to automatically open whenever you enter GPose, or upon startup, via the Settings tab.
 
 ## Presets
 
-A Camera preset stores the following information:
+Presets contain the same information the game itself saves.
 
-- Position mode (This is known in GPose as Character/Camera Position, under Save Preferences)
-- Distance from the player, or simply Zoom
-- Horizontal rotation angle (Affected by the aforementioned position mode)
-- Vertical rotation angle
-- Field of View
-- Roll angle
-- Pan & Tilt (See the blue instructions window within GPose)
+For Camera presets, this includes Zoom, Angles relative to the player, Field of View, and rotations.
+You can choose between two modes when saving Camera presets, which affect how the preset gets loaded. `Character Orientation` & `Character Position`. These function identically to the in-game settings: `Character Position` & `Camera Position`, respectively.
+
+For Lighting presets, this includes Light position relative to the player, RGB values and intensity (aka the light type). Lighting presets have an additional mode, `Camera Orientation`, which essentially does what the in-game setting `Camera Position` _claims_ to do.
 
 _Note that `3rd Person Camera Angle` (The setting found in Character Configuration) is not saved._
-
-A Lighting preset stores the following information:
-
-- Position mode, see above
-- Information about each of the 3 lights:
-  - Whether the light is active or not
-  - Horizontal rotation angle (Affected by position mode)
-  - Relative position to the player
-  - RGB values and light type (Size)
