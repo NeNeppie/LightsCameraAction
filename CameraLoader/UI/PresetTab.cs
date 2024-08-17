@@ -9,7 +9,7 @@ using CameraLoader.Utils;
 
 namespace CameraLoader.UI;
 
-public class PresetTab : PresetTabBase
+public class PresetTab
 {
     private readonly string _tabName;
     private readonly int _modeCount;
@@ -18,7 +18,14 @@ public class PresetTab : PresetTabBase
     private readonly Vector4 _presetButtonColor;
     private readonly Action _presetInfoDrawFunc;
 
-    private string _creationName;
+    private string _creationName = "";
+    private string _errorMessage = "";
+    private string _searchQuery = "";
+
+    private PresetBase _selectedPreset = null;
+    private int _selectedPresetMode = (int)PresetMode.CharacterOrientation;
+    private int _selectedPresetIndex = -1;
+    private bool _isRenameOpen = false;
 
     public PresetTab(Type presetType)
     {
@@ -47,14 +54,27 @@ public class PresetTab : PresetTabBase
 
         ImGui.Spacing();
 
-        var isInGPose = this.IsInGPose();
+        var isInGPose = IsInGPose();
+        if (!isInGPose)
+        {
+            this._selectedPresetIndex = -1;
+            this._selectedPreset = null;
+
+            ImGui.TextWrapped("Unavailable outside of Group Pose");
+
+            ImGui.Spacing();
+            ImGui.Separator();
+            ImGui.Spacing();
+
+            ImGui.BeginDisabled();
+        }
 
         ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, ImGuiUtils.FrameRounding);
         ImGui.BeginChild($"Preset Menu##{this._tabName}", new Vector2(0f, selectBoxHeight + (ImGuiUtils.FrameRounding * 2f)), true);
         ImGui.PopStyleVar(1);
 
         ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - ImGui.GetFrameHeightWithSpacing());
-        ImGui.InputTextWithHint("##Search", "Search...", ref this.SearchQuery, 30);
+        ImGui.InputTextWithHint("##Search", "Search...", ref this._searchQuery, 30);
         ImGui.SameLine();
         ImGui.PopItemWidth();
 
@@ -68,7 +88,6 @@ public class PresetTab : PresetTabBase
             }
             ImGui.OpenPopup("Preset Menu##Create");
         }
-        ImGui.PushItemWidth(100f * ImGuiHelpers.GlobalScale);
         if (ImGui.BeginPopup("Preset Menu##Create"))
         {
             DrawModeSelection(this._modeCount);
@@ -76,33 +95,32 @@ public class PresetTab : PresetTabBase
             ImGui.InputTextWithHint("##Preset Create Input", "Preset Name", ref this._creationName, 30);
             if (ImGui.Button("Create Preset") && this._creationName.Length > 0)
             {
-                this._presetHandler.Create(this._creationName, this.SelectedMode);
+                this._presetHandler.Create(this._creationName, this._selectedPresetMode);
                 ImGui.CloseCurrentPopup();
             }
             ImGui.EndPopup();
         }
-        ImGui.PopItemWidth();
 
         // Preset Listing
         for (int i = 0; i < this._presetHandler.GetPresets().Count; i++)
         {
             var preset = this._presetHandler.GetPresets()[i];
-            if (!preset.Name.ToLower().Contains(this.SearchQuery.ToLower())) { continue; }
+            if (!preset.Name.ToLower().Contains(this._searchQuery.ToLower())) { continue; }
 
-            var isCurrentSelected = this.PresetIndex == i;
+            var isCurrentSelected = this._selectedPresetIndex == i;
             if (ImGui.Selectable($"{preset.Name}", isCurrentSelected))
             {
-                this.PresetIndex = isCurrentSelected ? -1 : i;
-                this.SelectedPreset = isCurrentSelected ? null : preset;
+                this._selectedPresetIndex = isCurrentSelected ? -1 : i;
+                this._selectedPreset = isCurrentSelected ? null : preset;
 
-                this.RenameOpen = false;
-                this.ErrorMessage = "";
+                this._isRenameOpen = false;
+                this._errorMessage = "";
             }
         }
         ImGui.EndChild();
 
         // Preset Information
-        if (this.SelectedPreset is not null)
+        if (this._selectedPreset is not null)
         {
             ImGui.Spacing();
 
@@ -110,31 +128,31 @@ public class PresetTab : PresetTabBase
             ImGui.BeginChild("Preset Detail", new Vector2(0f, infoBoxHeight + (ImGuiUtils.FrameRounding * 2f)), true, ImGuiWindowFlags.NoScrollbar);
             ImGui.PopStyleVar(1);
 
-            ImGui.TextWrapped(this.SelectedPreset.Name);
+            ImGui.TextWrapped(this._selectedPreset.Name);
             this._presetInfoDrawFunc();
 
             if (ImGuiUtils.ColoredButton("Load Preset", ImGuiUtils.Blue))
             {
-                this.SelectedPreset.Load();
-                this.ErrorMessage = "";
+                this._selectedPreset.Load();
+                this._errorMessage = "";
             }
             ImGui.SameLine();
 
             if (ImGuiUtils.ColoredButton("Rename", ImGuiUtils.Orange))
             {
-                this.RenameOpen = !this.RenameOpen;
-                this.ErrorMessage = "";
+                this._isRenameOpen = !this._isRenameOpen;
+                this._errorMessage = "";
             }
             ImGui.SameLine();
 
             if (ImGuiUtils.ColoredButton("Remove", ImGuiUtils.Red))
             {
-                this._presetHandler.Delete(this.SelectedPreset);
-                this.PresetIndex = -1;
-                this.SelectedPreset = null;
+                this._presetHandler.Delete(this._selectedPreset);
+                this._selectedPresetIndex = -1;
+                this._selectedPreset = null;
             }
 
-            if (this.RenameOpen)
+            if (this._isRenameOpen)
                 DrawRename();
 
             this.DrawErrorMessage();
@@ -143,6 +161,15 @@ public class PresetTab : PresetTabBase
 
         if (!isInGPose) { ImGui.EndDisabled(); }
         ImGui.EndTabItem();
+    }
+
+    private static bool IsInGPose()
+    {
+        var isInCameraMode = Service.Conditions[Dalamud.Game.ClientState.Conditions.ConditionFlag.WatchingCutscene];
+        var gposeActorExists = Service.ObjectTable[201] != null;
+        if (!(isInCameraMode && gposeActorExists))
+            return false;
+        return true;
     }
 
     private void DrawModeSelection(int count)
@@ -157,7 +184,7 @@ public class PresetTab : PresetTabBase
             if ((int)mode > count - 1)
                 continue;
 
-            ImGui.RadioButton(mode.GetDescription(), ref this.SelectedMode, (int)mode);
+            ImGui.RadioButton(mode.GetDescription(), ref this._selectedPresetMode, (int)mode);
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip(mode.GetTooltip());
         }
@@ -166,7 +193,7 @@ public class PresetTab : PresetTabBase
 
     private void DrawCamersPresetInfo()
     {
-        var preset = (CameraPreset)this.SelectedPreset;
+        var preset = (CameraPreset)this._selectedPreset;
         ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.6f, 0.6f, 0.6f, 1f));
 
         ImGuiUtils.IconText(FontAwesomeIcon.Paste);
@@ -205,10 +232,11 @@ public class PresetTab : PresetTabBase
         ImGuiUtils.IconText(FontAwesomeIcon.Paste);
         ImGui.SameLine();
 
-        ImGui.TextWrapped($"Mode: {((PresetMode)this.SelectedPreset.PositionMode).GetDescription()}");
+        ImGui.TextWrapped($"Mode: {((PresetMode)this._selectedPreset.PositionMode).GetDescription()}");
 
-        foreach (var light in ((LightingPreset)this.SelectedPreset).Lights)
+        for (int i = 0; i < 3; i++)
         {
+            var light = ((LightingPreset)this._selectedPreset).Lights[i];
             ImGui.Separator();
             if (!light.Active) { ImGui.BeginDisabled(); }
 
@@ -217,7 +245,7 @@ public class PresetTab : PresetTabBase
 
             ImGui.Text($"X: {light.RelativePos.X:F2},  Y: {light.RelativePos.Y:F2},  Z: {light.RelativePos.Z:F2}");
 
-            if (this.SelectedPreset.PositionMode == (int)PresetMode.CharacterOrientation)
+            if (this._selectedPreset.PositionMode == (int)PresetMode.CharacterOrientation)
             {
                 ImGui.SameLine();
                 ImGui.Text($"({MathUtils.RadToDeg(light.RelativeRot):F2}\x00B0)");
@@ -232,8 +260,7 @@ public class PresetTab : PresetTabBase
             ImGui.Text($"{3 - light.Type}  |");
             ImGui.SameLine();
 
-            // FIXME: ImGui links all three color pickers together due to their shared name. Visual bug
-            ImGui.ColorEdit3("##Light ColorEdit", ref colorFloat,
+            ImGui.ColorEdit3($"##Light ColorEdit{i}", ref colorFloat,
                 ImGuiColorEditFlags.NoPicker | ImGuiColorEditFlags.NoBorder | ImGuiColorEditFlags.NoDragDrop | ImGuiColorEditFlags.HDR);
 
             if (!light.Active) { ImGui.EndDisabled(); }
@@ -243,18 +270,26 @@ public class PresetTab : PresetTabBase
 
     private void DrawRename()
     {
-        var newName = this.SelectedPreset.Name;
+        var newName = this._selectedPreset.Name;
         ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
         if (ImGui.InputText("##RenameLighting", ref newName, 30, ImGuiInputTextFlags.EnterReturnsTrue))
         {
-            this.RenameOpen = false;
-            this.PresetIndex = this._presetHandler.Rename(this.SelectedPreset, newName);
-            if (this.PresetIndex == -1)
+            this._isRenameOpen = false;
+            this._selectedPresetIndex = this._presetHandler.Rename(this._selectedPreset, newName);
+            if (this._selectedPresetIndex == -1)
             {
-                Service.PluginLog.Information($"Can't rename preset \"{this.SelectedPreset.Name}\" to \"{newName}\" - Name is taken");
-                this.ErrorMessage = "Names must be unique";
+                Service.PluginLog.Information($"Can't rename preset \"{this._selectedPreset.Name}\" to \"{newName}\" - Name is taken");
+                this._errorMessage = "Names must be unique";
             }
         }
         ImGui.PopItemWidth();
+    }
+
+    private void DrawErrorMessage()
+    {
+        if (this._errorMessage != "")
+        {
+            ImGui.TextColored(new Vector4(1, 0, 0, 1), this._errorMessage);
+        }
     }
 }
