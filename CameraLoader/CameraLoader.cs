@@ -31,6 +31,7 @@ public class CameraLoader : IDalamudPlugin
 
         Service.PluginInterface.UiBuilder.Draw += this._windowSystem.Draw;
         Service.PluginInterface.UiBuilder.DisableGposeUiHide = true;
+        Service.PluginInterface.UiBuilder.OpenMainUi += this._window.Toggle;
     }
 
     private void OnCommand(string command, string args)

@@ -50,9 +50,7 @@ public partial class PluginWindow
             DrawSortingSettings();
 
         ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.5f, 0.5f, 0.5f, 1f));
-        ImGui.TextWrapped("\nHello there! This is my first plugin, so expect bugs to pop up here and there as I figure things out. " +
-                            "Your feedback is greatly appreciated.");
-        ImGui.Text($"\nHappy GPosing!");
+        ImGui.Text($"Hey there! Happy GPosing!");
         ImGui.PopStyleColor();
 
         ImGui.EndTabItem();

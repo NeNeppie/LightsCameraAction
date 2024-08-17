@@ -1,10 +1,10 @@
 {
-  "Name": "Lights, Camera, Action!",
-  "Author": "NeNeppie",
-  "Description": "(Formerly known as Camera Loader)\nThis plugin lets you save unlimited camera & lighting configurations/presets in Group Pose at a time, vastly improving over the vanilla feature which lets you save only one of each.\n\n*Only useable within Group Pose.*",
-  "Punchline": "Save and load unlimited camera and lighting presets in Group Pose",
-  "RepoUrl": "https://github.com/NeNeppie/LightsCameraAction",
-  "Tags": ["Utility", "UI", "Gpose", "Group pose", "Camera"],
-  "CategoryTags": ["Utility", "UI"],
-  "InternalName": "CameraLoader"
+    "Name": "Lights, Camera, Action!",
+    "Author": "NeNeppie",
+    "Description": "This plugin lets you save unlimited camera & lighting configurations/presets in Group Pose at a time, vastly improving over the vanilla feature which lets you save only one of each.",
+    "Punchline": "Save and load unlimited camera and lighting presets in Group Pose",
+    "RepoUrl": "https://github.com/NeNeppie/LightsCameraAction",
+    "Tags": ["Utility", "UI", "Gpose", "Group pose", "Camera"],
+    "CategoryTags": ["Utility", "UI"],
+    "InternalName": "CameraLoader"
 }
