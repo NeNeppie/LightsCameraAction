@@ -73,7 +73,7 @@ public class PresetTab
         ImGui.BeginChild($"Preset Menu##{this._tabName}", new Vector2(0f, selectBoxHeight + (ImGuiUtils.FrameRounding * 2f)), true);
         ImGui.PopStyleVar(1);
 
-        ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - ImGui.GetFrameHeightWithSpacing());
+        ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - ImGui.GetFrameHeightWithSpacing() - (1f * ImGuiHelpers.GlobalScale));
         ImGui.InputTextWithHint("##Search", "Search...", ref this._searchQuery, 30);
         ImGui.SameLine();
         ImGui.PopItemWidth();
