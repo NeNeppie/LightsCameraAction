@@ -1,4 +1,7 @@
 using System;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 
 using CameraLoader.Game.Structs;
@@ -12,7 +15,9 @@ public enum PresetMode
     CameraOrientation
 }
 
-public unsafe abstract class PresetBase
+[JsonDerivedType(typeof(CameraPreset))]
+[JsonDerivedType(typeof(LightingPreset))]
+public abstract unsafe class PresetBase
 {
     public string Name { get; set; } = "";
     public int PositionMode { get; set; }
@@ -28,6 +33,11 @@ public unsafe abstract class PresetBase
     }
 
     public abstract bool Load();
+    public string Export()
+    {
+        var json = JsonSerializer.Serialize(this, new JsonSerializerOptions() { IncludeFields = true });
+        return Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
+    }
 }
 
 internal static class PresetModeEx

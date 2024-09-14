@@ -1,7 +1,6 @@
 using System;
 using System.Numerics;
 using Dalamud.Interface;
-using Dalamud.Interface.Utility;
 using ImGuiNET;
 
 using CameraLoader.Game;
@@ -21,6 +20,7 @@ public class PresetTab
     private string _creationName = "";
     private string _errorMessage = "";
     private string _searchQuery = "";
+    private string _importInput = "";
 
     private PresetBase _selectedPreset = null;
     private int _selectedPresetMode = (int)PresetMode.CharacterOrientation;
@@ -73,10 +73,23 @@ public class PresetTab
         ImGui.BeginChild($"Preset Menu##{this._tabName}", new Vector2(0f, selectBoxHeight + (ImGuiUtils.FrameRounding * 2f)), true);
         ImGui.PopStyleVar(1);
 
-        ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - ImGui.GetFrameHeightWithSpacing() - (1f * ImGuiHelpers.GlobalScale));
+        ImGui.PushItemWidth(ImGuiUtils.GetAvailableWidthIconButton([FontAwesomeIcon.Plus, FontAwesomeIcon.FileImport]));
         ImGui.InputTextWithHint("##Search", "Search...", ref this._searchQuery, 30);
         ImGui.SameLine();
         ImGui.PopItemWidth();
+
+        ImGuiUtils.IconButton(FontAwesomeIcon.FileImport, default, "Import preset");
+        if (ImGui.BeginPopupContextItem("Preset Menu##Import", ImGuiPopupFlags.MouseButtonLeft))
+        {
+            if (ImGui.InputText("##ImportInput", ref _importInput, 1024, ImGuiInputTextFlags.EnterReturnsTrue))
+            {
+                _presetHandler.Import(_importInput);
+                _importInput = "";
+                ImGui.CloseCurrentPopup();
+            }
+            ImGui.EndPopup();
+        }
+        ImGui.SameLine();
 
         // Preset Creation Popup
         if (ImGuiUtils.ColoredIconButton(FontAwesomeIcon.Plus, this._presetButtonColor, default, "Create a new preset"))
@@ -129,6 +142,11 @@ public class PresetTab
             ImGui.PopStyleVar(1);
 
             ImGui.TextWrapped(this._selectedPreset.Name);
+            ImGui.SameLine();
+
+            if (ImGuiUtils.IconButton(FontAwesomeIcon.FileExport, default, "Export to Clipboard"))
+                ImGui.SetClipboardText(_selectedPreset.Export());
+
             this._presetInfoDrawFunc();
 
             if (ImGuiUtils.ColoredButton("Load Preset", ImGuiUtils.Blue))

@@ -82,4 +82,24 @@ public static class ImGuiUtils
             ImGui.SetTooltip(tooltip);
         }
     }
+
+    public static float GetAvailableWidthIconButton(FontAwesomeIcon[] icons)
+    {
+        var iconsWidth = CalcIconWidth(icons);
+        return ImGui.GetContentRegionAvail().X - iconsWidth
+            - ((ImGui.GetStyle().ItemSpacing.X + (ImGui.GetStyle().FramePadding.X * 2f)) * icons.Length);
+    }
+
+    private static float CalcIconWidth(FontAwesomeIcon[] icons)
+    {
+        var width = 0f;
+        ImGui.PushFont(UiBuilder.IconFont);
+        foreach (var icon in icons)
+        {
+            width += ImGui.CalcTextSize(icon.ToIconString()).X;
+        }
+        ImGui.PopFont();
+
+        return width;
+    }
 }
