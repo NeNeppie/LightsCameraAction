@@ -20,7 +20,6 @@ public class PresetTab
     private string _creationName = "";
     private string _errorMessage = "";
     private string _searchQuery = "";
-    private string _importInput = "";
 
     private PresetBase _selectedPreset = null;
     private int _selectedPresetMode = (int)PresetMode.CharacterOrientation;
@@ -36,7 +35,7 @@ public class PresetTab
             this._modeCount = 2;
             this._presetIcon = FontAwesomeIcon.CameraRetro;
             this._presetButtonColor = ImGuiUtils.Green;
-            this._presetInfoDrawFunc = DrawCamersPresetInfo;
+            this._presetInfoDrawFunc = DrawCameraPresetInfo;
         }
         else if (presetType == typeof(LightingPreset))
         {
@@ -78,26 +77,26 @@ public class PresetTab
         ImGui.SameLine();
         ImGui.PopItemWidth();
 
-        ImGuiUtils.IconButton(FontAwesomeIcon.FileImport, default, "Import preset");
-        if (ImGui.BeginPopupContextItem("Preset Menu##Import", ImGuiPopupFlags.MouseButtonLeft))
+        // Preset Importing 
+        if (ImGuiUtils.IconButton(FontAwesomeIcon.FileImport, default, "Import preset from clipboard"))
         {
-            if (ImGui.InputText("##ImportInput", ref _importInput, 1024, ImGuiInputTextFlags.EnterReturnsTrue))
+            var importName = "";
+            for (int i = 1; i <= _presetHandler.GetPresets().Count + 1; i++)
             {
-                _presetHandler.Import(_importInput);
-                _importInput = "";
-                ImGui.CloseCurrentPopup();
+                importName = $"Imported Preset #{i}";
+                if (!_presetHandler.IsNameTaken(importName)) { break; }
             }
-            ImGui.EndPopup();
+            _presetHandler.Import(ImGui.GetClipboardText(), importName);
         }
         ImGui.SameLine();
 
         // Preset Creation Popup
         if (ImGuiUtils.ColoredIconButton(FontAwesomeIcon.Plus, this._presetButtonColor, default, "Create a new preset"))
         {
-            for (int i = 1; i <= this._presetHandler.GetPresets().Count + 1; i++)
+            for (int i = 1; i <= _presetHandler.GetPresets().Count + 1; i++)
             {
-                this._creationName = $"Preset #{i}";
-                if (!Service.Config.LightingPresetNames.Contains(this._creationName)) { break; }
+                _creationName = $"Preset #{i}";
+                if (!_presetHandler.IsNameTaken(_creationName)) { break; }
             }
             ImGui.OpenPopup("Preset Menu##Create");
         }
@@ -209,7 +208,7 @@ public class PresetTab
         ImGui.EndGroup();
     }
 
-    private void DrawCamersPresetInfo()
+    private void DrawCameraPresetInfo()
     {
         var preset = (CameraPreset)this._selectedPreset;
         ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.6f, 0.6f, 0.6f, 1f));
@@ -290,7 +289,7 @@ public class PresetTab
     {
         var newName = this._selectedPreset.Name;
         ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
-        if (ImGui.InputText("##RenameLighting", ref newName, 30, ImGuiInputTextFlags.EnterReturnsTrue))
+        if (ImGui.InputText("##RenamePreset", ref newName, 30, ImGuiInputTextFlags.EnterReturnsTrue))
         {
             this._isRenameOpen = false;
             this._selectedPresetIndex = this._presetHandler.Rename(this._selectedPreset, newName);

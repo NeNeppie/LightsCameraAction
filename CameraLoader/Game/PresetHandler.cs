@@ -8,10 +8,14 @@ namespace CameraLoader.Game;
 
 public abstract class PresetHandler
 {
-    public abstract void Import(string encoded);
-    public abstract void Create(string name, int mode);
+    public abstract void Import(string encoded, string name);
+    public abstract bool Create(string name, int mode);
+
     public abstract List<PresetBase> GetPresets();
+
     public abstract int Rename(PresetBase preset, string name);
+    public abstract bool IsNameTaken(string name);
+
     public abstract void Delete(PresetBase preset);
 
     protected static string Deserialize(string encoded)
@@ -32,7 +36,7 @@ public abstract class PresetHandler
 
 public class CameraPresetHandler : PresetHandler
 {
-    public override void Import(string encoded)
+    public override void Import(string encoded, string name)
     {
         if (encoded == null)
             return;
@@ -51,30 +55,33 @@ public class CameraPresetHandler : PresetHandler
 
         if (preset != null)
         {
-            // TODO: "Imported Preset #{i}"
-            //       Add Config setting to preserve/overwrite preset creation date
-            preset.Name = "Imported Preset";
-            //Service.Config.CameraPresetNames.Add(preset.Name);
+            preset.Name = name;
+            Service.Config.CameraPresetNames.Add(preset.Name);
             Service.Config.CameraPresets.Add(preset);
             Service.Config.SortPresetList(Service.Config.CameraPresets, Service.Config.SortingModeCamera);
             Service.Config.Save();
         }
     }
 
-    public override void Create(string name, int mode)
+    public override bool Create(string name, int mode)
     {
+        if (IsNameTaken(name))
+            return false;
+
         var preset = new CameraPreset(name, mode);
         Service.Config.CameraPresetNames.Add(preset.Name);
         Service.Config.CameraPresets.Add(preset);
         Service.Config.SortPresetList(Service.Config.CameraPresets, Service.Config.SortingModeCamera);
         Service.Config.Save();
+
+        return true;
     }
 
     public override List<PresetBase> GetPresets() => Service.Config.CameraPresets.ToList<PresetBase>();
 
     public override int Rename(PresetBase preset, string name)
     {
-        if (Service.Config.CameraPresetNames.Contains(name))
+        if (IsNameTaken(name))
             return -1;
 
         Service.Config.CameraPresetNames.Remove(preset.Name);
@@ -87,6 +94,8 @@ public class CameraPresetHandler : PresetHandler
         return GetPresets().IndexOf(preset);
     }
 
+    public override bool IsNameTaken(string name) => Service.Config.CameraPresetNames.Contains(name);
+
     public override void Delete(PresetBase preset)
     {
         Service.Config.CameraPresetNames.Remove(preset.Name);
@@ -97,7 +106,7 @@ public class CameraPresetHandler : PresetHandler
 
 public class LightingPresetHandler : PresetHandler
 {
-    public override void Import(string encoded)
+    public override void Import(string encoded, string name)
     {
         if (encoded == null)
             return;
@@ -116,30 +125,33 @@ public class LightingPresetHandler : PresetHandler
 
         if (preset != null)
         {
-            // TODO: "Imported Preset #{i}"
-            //       Add Config setting to preserve/overwrite preset creation date
-            preset.Name = "Imported Preset";
-            //Service.Config.LightingPresetNames.Add(preset.Name);
+            preset.Name = name;
+            Service.Config.LightingPresetNames.Add(preset.Name);
             Service.Config.LightingPresets.Add(preset);
             Service.Config.SortPresetList(Service.Config.LightingPresets, Service.Config.SortingModeLighting);
             Service.Config.Save();
         }
     }
 
-    public override void Create(string name, int mode)
+    public override bool Create(string name, int mode)
     {
+        if (IsNameTaken(name))
+            return false;
+
         var preset = new LightingPreset(name, mode);
         Service.Config.LightingPresetNames.Add(preset.Name);
         Service.Config.LightingPresets.Add(preset);
         Service.Config.SortPresetList(Service.Config.LightingPresets, Service.Config.SortingModeLighting);
         Service.Config.Save();
+
+        return true;
     }
 
     public override List<PresetBase> GetPresets() => Service.Config.LightingPresets.ToList<PresetBase>();
 
     public override int Rename(PresetBase preset, string name)
     {
-        if (Service.Config.LightingPresetNames.Contains(name))
+        if (IsNameTaken(name))
             return -1;
 
         Service.Config.LightingPresetNames.Remove(preset.Name);
@@ -151,6 +163,8 @@ public class LightingPresetHandler : PresetHandler
         Service.Config.Save();
         return GetPresets().IndexOf(preset);
     }
+
+    public override bool IsNameTaken(string name) => Service.Config.LightingPresetNames.Contains(name);
 
     public override void Delete(PresetBase preset)
     {
