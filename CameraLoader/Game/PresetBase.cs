@@ -15,8 +15,8 @@ public enum PresetMode
     CameraOrientation
 }
 
-[JsonDerivedType(typeof(CameraPreset))]
-[JsonDerivedType(typeof(LightingPreset))]
+[JsonDerivedType(typeof(CameraPreset), "CameraPreset")]
+[JsonDerivedType(typeof(LightingPreset), "LightingPreset")]
 public abstract unsafe class PresetBase
 {
     public string Name { get; set; } = "";

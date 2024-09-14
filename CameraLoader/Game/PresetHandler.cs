@@ -18,17 +18,17 @@ public abstract class PresetHandler
 
     public abstract void Delete(PresetBase preset);
 
-    protected static string Deserialize(string encoded)
+    protected static PresetBase Deserialize(string encoded)
     {
         try
         {
             var jsonBytes = Convert.FromBase64String(encoded);
             var jsonString = Encoding.UTF8.GetString(jsonBytes);
-            return jsonString;
+            return JsonSerializer.Deserialize<PresetBase>(jsonString, new JsonSerializerOptions() { IncludeFields = true });
         }
         catch (Exception e)
         {
-            Service.PluginLog.Error($"Error decompressing preset string: {e.StackTrace}");
+            Service.PluginLog.Error($"Error importing preset: {e.Message}\n {e.StackTrace}");
             return null;
         }
     }
@@ -41,19 +41,7 @@ public class CameraPresetHandler : PresetHandler
         if (encoded == null)
             return;
 
-        CameraPreset preset;
-        try
-        {
-            var jsonString = Deserialize(encoded);
-            preset = JsonSerializer.Deserialize<CameraPreset>(jsonString, new JsonSerializerOptions() { IncludeFields = true });
-        }
-        catch (Exception e)
-        {
-            Service.PluginLog.Error($"Error importing Camera Preset: {e.Message}\n {e.StackTrace}");
-            return;
-        }
-
-        if (preset != null)
+        if (Deserialize(encoded) is CameraPreset preset)
         {
             preset.Name = name;
             Service.Config.CameraPresetNames.Add(preset.Name);
@@ -111,19 +99,7 @@ public class LightingPresetHandler : PresetHandler
         if (encoded == null)
             return;
 
-        LightingPreset preset;
-        try
-        {
-            var jsonString = Deserialize(encoded);
-            preset = JsonSerializer.Deserialize<LightingPreset>(jsonString, new JsonSerializerOptions() { IncludeFields = true });
-        }
-        catch (Exception e)
-        {
-            Service.PluginLog.Error($"Error importing Lighting Preset: {e.Message}\n {e.StackTrace}");
-            return;
-        }
-
-        if (preset != null)
+        if (Deserialize(encoded) is LightingPreset preset)
         {
             preset.Name = name;
             Service.Config.LightingPresetNames.Add(preset.Name);
