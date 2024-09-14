@@ -18,7 +18,6 @@ public class PresetTab
     private readonly Action _presetInfoDrawFunc;
 
     private string _creationName = "";
-    private string _errorMessage = "";
     private string _searchQuery = "";
 
     private PresetBase _selectedPreset = null;
@@ -86,7 +85,8 @@ public class PresetTab
                 importName = $"Imported Preset #{i}";
                 if (!_presetHandler.IsNameTaken(importName)) { break; }
             }
-            _presetHandler.Import(ImGui.GetClipboardText(), importName);
+            if (!_presetHandler.Import(ImGui.GetClipboardText(), importName))
+                Service.ChatGui.PrintError("Unable to import preset. Check you've copied the preset correctly and that you're on the right tab.");
         }
         ImGui.SameLine();
 
@@ -107,8 +107,14 @@ public class PresetTab
             ImGui.InputTextWithHint("##Preset Create Input", "Preset Name", ref this._creationName, 30);
             if (ImGui.Button("Create Preset") && this._creationName.Length > 0)
             {
-                this._presetHandler.Create(this._creationName, this._selectedPresetMode);
-                ImGui.CloseCurrentPopup();
+                if (_presetHandler.Create(_creationName, _selectedPresetMode))
+                {
+                    ImGui.CloseCurrentPopup();
+                }
+                else
+                {
+                    Service.ChatGui.PrintError("Unable to create preset: Name is taken.");
+                }
             }
             ImGui.EndPopup();
         }
@@ -124,9 +130,7 @@ public class PresetTab
             {
                 this._selectedPresetIndex = isCurrentSelected ? -1 : i;
                 this._selectedPreset = isCurrentSelected ? null : preset;
-
                 this._isRenameOpen = false;
-                this._errorMessage = "";
             }
         }
         ImGui.EndChild();
@@ -141,7 +145,7 @@ public class PresetTab
             ImGui.PopStyleVar(1);
 
             ImGui.TextWrapped(this._selectedPreset.Name);
-            ImGui.SameLine();
+            ImGui.SameLine(ImGuiUtils.GetAvailableWidthIconButton([FontAwesomeIcon.FileExport]) + ImGui.GetStyle().ItemSpacing.X);
 
             if (ImGuiUtils.IconButton(FontAwesomeIcon.FileExport, default, "Export to Clipboard"))
                 ImGui.SetClipboardText(_selectedPreset.Export());
@@ -151,14 +155,12 @@ public class PresetTab
             if (ImGuiUtils.ColoredButton("Load Preset", ImGuiUtils.Blue))
             {
                 this._selectedPreset.Load();
-                this._errorMessage = "";
             }
             ImGui.SameLine();
 
             if (ImGuiUtils.ColoredButton("Rename", ImGuiUtils.Orange))
             {
                 this._isRenameOpen = !this._isRenameOpen;
-                this._errorMessage = "";
             }
             ImGui.SameLine();
 
@@ -172,7 +174,6 @@ public class PresetTab
             if (this._isRenameOpen)
                 DrawRename();
 
-            this.DrawErrorMessage();
             ImGui.EndChild();
         }
 
@@ -287,26 +288,16 @@ public class PresetTab
 
     private void DrawRename()
     {
-        var newName = this._selectedPreset.Name;
+        var newName = _selectedPreset.Name;
         ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
         if (ImGui.InputText("##RenamePreset", ref newName, 30, ImGuiInputTextFlags.EnterReturnsTrue))
         {
-            this._isRenameOpen = false;
-            this._selectedPresetIndex = this._presetHandler.Rename(this._selectedPreset, newName);
-            if (this._selectedPresetIndex == -1)
-            {
-                Service.PluginLog.Information($"Can't rename preset \"{this._selectedPreset.Name}\" to \"{newName}\" - Name is taken");
-                this._errorMessage = "Names must be unique";
-            }
+            _isRenameOpen = false;
+            var newIndex = _presetHandler.Rename(_selectedPreset, newName);
+            if (newIndex == -1)
+                Service.ChatGui.PrintError("Unable to rename preset: Name is taken.");
+            _selectedPresetIndex = newIndex == -1 ? _selectedPresetIndex : newIndex;
         }
         ImGui.PopItemWidth();
-    }
-
-    private void DrawErrorMessage()
-    {
-        if (this._errorMessage != "")
-        {
-            ImGui.TextColored(new Vector4(1, 0, 0, 1), this._errorMessage);
-        }
     }
 }

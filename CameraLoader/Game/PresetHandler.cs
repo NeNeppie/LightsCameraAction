@@ -8,7 +8,7 @@ namespace CameraLoader.Game;
 
 public abstract class PresetHandler
 {
-    public abstract void Import(string encoded, string name);
+    public abstract bool Import(string encoded, string name);
     public abstract bool Create(string name, int mode);
 
     public abstract List<PresetBase> GetPresets();
@@ -36,10 +36,10 @@ public abstract class PresetHandler
 
 public class CameraPresetHandler : PresetHandler
 {
-    public override void Import(string encoded, string name)
+    public override bool Import(string encoded, string name)
     {
         if (encoded == null)
-            return;
+            return false;
 
         if (Deserialize(encoded) is CameraPreset preset)
         {
@@ -51,7 +51,9 @@ public class CameraPresetHandler : PresetHandler
             Service.Config.CameraPresets.Add(preset);
             Service.Config.SortPresetList(Service.Config.CameraPresets, Service.Config.SortingModeCamera);
             Service.Config.Save();
+            return true;
         }
+        return false;
     }
 
     public override bool Create(string name, int mode)
@@ -97,10 +99,10 @@ public class CameraPresetHandler : PresetHandler
 
 public class LightingPresetHandler : PresetHandler
 {
-    public override void Import(string encoded, string name)
+    public override bool Import(string encoded, string name)
     {
         if (encoded == null)
-            return;
+            return false;
 
         if (Deserialize(encoded) is LightingPreset preset)
         {
@@ -112,7 +114,9 @@ public class LightingPresetHandler : PresetHandler
             Service.Config.LightingPresets.Add(preset);
             Service.Config.SortPresetList(Service.Config.LightingPresets, Service.Config.SortingModeLighting);
             Service.Config.Save();
+            return true;
         }
+        return false;
     }
 
     public override bool Create(string name, int mode)
