@@ -44,6 +44,9 @@ public class CameraPresetHandler : PresetHandler
         if (Deserialize(encoded) is CameraPreset preset)
         {
             preset.Name = name;
+            if (Service.Config.OverwriteImportCreationDate)
+                preset.CreationDate = DateTime.Now;
+
             Service.Config.CameraPresetNames.Add(preset.Name);
             Service.Config.CameraPresets.Add(preset);
             Service.Config.SortPresetList(Service.Config.CameraPresets, Service.Config.SortingModeCamera);
@@ -102,6 +105,9 @@ public class LightingPresetHandler : PresetHandler
         if (Deserialize(encoded) is LightingPreset preset)
         {
             preset.Name = name;
+            if (Service.Config.OverwriteImportCreationDate)
+                preset.CreationDate = DateTime.Now;
+
             Service.Config.LightingPresetNames.Add(preset.Name);
             Service.Config.LightingPresets.Add(preset);
             Service.Config.SortPresetList(Service.Config.LightingPresets, Service.Config.SortingModeLighting);

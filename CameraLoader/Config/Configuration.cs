@@ -20,6 +20,8 @@ public class Configuration : IPluginConfiguration
     public int RowsVisibleLighting = 5;
     public PresetSortingMode SortingModeLighting = 0;
 
+    public bool OverwriteImportCreationDate = false;
+
     public List<CameraPreset> CameraPresets = new();
     public List<LightingPreset> LightingPresets = new();
 

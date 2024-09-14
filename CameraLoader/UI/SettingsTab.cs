@@ -104,5 +104,7 @@ public partial class PluginWindow
             }
             ImGui.EndCombo();
         }
+
+        ImGui.Checkbox("Overwrite imported presets'\n Creation Date", ref Service.Config.OverwriteImportCreationDate);
     }
 }
