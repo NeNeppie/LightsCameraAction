@@ -1,4 +1,4 @@
-# Lights, Camera, Action! for Dalamud (formerly Camera Loader)
+# Lights, Camera, Action! for Dalamud
 
 Lights, Camera, Action! or LCAction, lets you save unlimited camera & lighting configurations/presets in Group Pose at a time, vastly improving over the vanilla feature which lets you save only one of each. This makes taking quality screenshots easier and more consistent.
 
@@ -6,7 +6,9 @@ For obvious reasons, the plugin's main features are only available while in Grou
 
 ## Installation & Useage
 
-In-game, open the Dalamud plugin installer by typing `/xlplugins` and look for the plugin there. Note that for the time being you must opt-in to testing builds to install the plugin. To do this, type `/xlsettings` and navigate to the Experimental tab.
+In-game, open the Dalamud plugin installer by typing `/xlplugins` and look for the plugin there.
+
+For experimental testing builds, type `/xlsettings` and navigate to the Experimental tab. You can then opt-in to testing builds. From there, navigate back to the plugin installer, right click the plugin, and select "Receive plugin testing versions".
 
 You can type `/lca` to bring up the plugin window. You can also configure the plugin to automatically open whenever you enter GPose, or upon startup, via the Settings tab.
 
