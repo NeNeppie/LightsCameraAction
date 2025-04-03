@@ -45,10 +45,10 @@ public unsafe class GameFunctions
     {
         if (obj != null)
         {
-            // I can't tell whether these first two make a difference, but better safe than sorry. Credit to Ktisis.
+            this._lightUpdateRange.Invoke(obj->LightRenderObject, '\0');
+            // Credit to Ktisis for the signatures of these two.
             this._lightUpdateCulling.Invoke(obj);
             this._lightUpdateMaterials.Invoke(obj);
-            this._lightUpdateRange.Invoke(obj->LightRenderObject, '\0');
         }
     }
 
