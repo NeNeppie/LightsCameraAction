@@ -1,7 +1,7 @@
 using System;
 using System.Numerics;
 using Dalamud.Interface;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 using CameraLoader.Game;
 using CameraLoader.Utils;
@@ -279,7 +279,7 @@ public class PresetTab
             ImGui.SameLine();
 
             ImGui.ColorEdit3($"##Light ColorEdit{i}", ref colorFloat,
-                ImGuiColorEditFlags.NoPicker | ImGuiColorEditFlags.NoBorder | ImGuiColorEditFlags.NoDragDrop | ImGuiColorEditFlags.HDR);
+                ImGuiColorEditFlags.NoPicker | ImGuiColorEditFlags.NoBorder | ImGuiColorEditFlags.NoDragDrop | ImGuiColorEditFlags.Hdr);
 
             if (!light.Active) { ImGui.EndDisabled(); }
         }
