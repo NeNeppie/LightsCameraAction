@@ -9,7 +9,7 @@ namespace CameraLoader.Game.Structs;
 [StructLayout(LayoutKind.Explicit)]
 public unsafe struct GameCamera
 {
-    [FieldOffset(0x80)] public Vector3 Position;
+    [FieldOffset(0x60)] public Vector3 Position;
     [FieldOffset(0x124)] public float Distance;     // default is 6
     [FieldOffset(0x128)] public float MinDistance;  // 1.5
     [FieldOffset(0x12C)] public float MaxDistance;  // 20

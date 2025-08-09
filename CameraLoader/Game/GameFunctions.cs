@@ -29,7 +29,7 @@ public unsafe class GameFunctions
 
     // LightRenderObject.UpdateTypeRange(char unk) "48 89 5C 24 ?? 56 48 83 EC 50 48 8B D9"
     private delegate void LightUpdateRangeDelegate(LightRenderObject* obj, char unk);
-    [Signature("E8 ?? ?? ?? ?? 48 8D 8F ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 48 8D 8F ?? ?? ?? ??")]
+    [Signature("E8 ?? ?? ?? ?? 48 8D 8F ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 48 8D 8F ?? ?? ?? ?? 48 8D 55")]
     private readonly LightUpdateRangeDelegate _lightUpdateRange = null!;
 
     public GameFunctions()
@@ -40,7 +40,7 @@ public unsafe class GameFunctions
     public char ToggleLight(EventGPoseController* ptr, uint index) => this._toggleLight.Invoke(ptr, index);
 
     // public void SetLightType(EventGPoseController* ptr, uint index, Vector3 RGB, int type) => this._setLightType.Invoke(ptr, index, RGB, type);
-    
+
     public void UpdateLightObject(LightObject* obj)
     {
         if (obj != null)
