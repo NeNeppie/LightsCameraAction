@@ -169,6 +169,7 @@ public class PresetTab
                 this._presetHandler.Delete(this._selectedPreset);
                 this._selectedPresetIndex = -1;
                 this._selectedPreset = null;
+                this._isRenameOpen = false;
             }
 
             if (this._isRenameOpen)
@@ -288,6 +289,8 @@ public class PresetTab
 
     private void DrawRename()
     {
+        if (_selectedPreset is null) return;
+        
         var newName = _selectedPreset.Name;
         ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
         if (ImGui.InputText("##RenamePreset", ref newName, 30, ImGuiInputTextFlags.EnterReturnsTrue))
